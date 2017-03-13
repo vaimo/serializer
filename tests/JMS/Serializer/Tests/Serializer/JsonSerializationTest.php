@@ -23,6 +23,7 @@ use JMS\Serializer\Exception\RuntimeException;
 use JMS\Serializer\EventDispatcher\Event;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\GraphNavigator;
+use JMS\Serializer\Tests\Fixtures\Tag;
 use JMS\Serializer\VisitorInterface;
 use JMS\Serializer\Tests\Fixtures\Author;
 use JMS\Serializer\Tests\Fixtures\AuthorList;
@@ -264,7 +265,7 @@ class JsonSerializationTest extends BaseSerializationTest
 
     public function testSerializeArrayWithEmptyObject()
     {
-        $this->assertEquals('{"0":{}}', $this->serialize(array(new \stdClass())));
+        $this->assertEquals('[{}]', $this->serialize(array(new \stdClass())));
     }
 
     public function getTypeHintedArrays()
@@ -274,7 +275,7 @@ class JsonSerializationTest extends BaseSerializationTest
             [[1, 2], '[1,2]', null],
             [['a', 'b'], '["a","b"]', null],
             [['a' => 'a', 'b' => 'b'], '{"a":"a","b":"b"}', null],
-            
+
             [[], '[]', null],
             [[], '[]', SerializationContext::create()->setInitialType('array')],
             [[], '[]', SerializationContext::create()->setInitialType('array<integer>')],
@@ -307,6 +308,40 @@ class JsonSerializationTest extends BaseSerializationTest
      * @param SerializationContext|null $context
      */
     public function testTypeHintedArraySerialization(array $array, $expected, $context = null)
+    {
+        $this->assertEquals($expected, $this->serialize($array, $context));
+    }
+
+    public function getTypeHintedArraysAndStdClass()
+    {
+        $c1 = new \stdClass();
+        $c2 = new \stdClass();
+        $c2->foo = 'bar';
+
+        $tag = new Tag("tag");
+
+        return [
+
+            [[$c1], '[{}]', SerializationContext::create()->setInitialType('array<stdClass>')],
+
+            [[$c2], '[{"foo":"bar"}]', SerializationContext::create()->setInitialType('array<stdClass>')],
+
+            [[$tag], '[{"name":"tag"}]', SerializationContext::create()->setInitialType('array<JMS\Serializer\Tests\Fixtures\Tag>')],
+
+            [[$c1], '{"0":{}}', SerializationContext::create()->setInitialType('array<integer,stdClass>')],
+            [[$c2], '{"0":{"foo":"bar"}}', SerializationContext::create()->setInitialType('array<integer,stdClass>')],
+
+            [[$tag], '{"0":{"name":"tag"}}', SerializationContext::create()->setInitialType('array<integer,JMS\Serializer\Tests\Fixtures\Tag>')],
+        ];
+    }
+
+    /**
+     * @dataProvider getTypeHintedArraysAndStdClass
+     * @param array $array
+     * @param string $expected
+     * @param SerializationContext|null $context
+     */
+    public function testTypeHintedArrayAndStdClassSerialization(array $array, $expected, $context = null)
     {
         $this->assertEquals($expected, $this->serialize($array, $context));
     }
