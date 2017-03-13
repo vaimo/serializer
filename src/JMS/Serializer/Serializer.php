@@ -148,7 +148,7 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
                 $type = $context->getInitialType() !== null ? $this->typeParser->parse($context->getInitialType()) : null;
 
                 $this->visit($visitor, $context, $data, 'json', $type);
-                $result = $this->convertArrayObjects($visitor->getRoot());
+                $result = $this->convertStdClasses($visitor->getRoot());
 
                 if ( ! is_array($result)) {
                     throw new RuntimeException(sprintf(
@@ -207,14 +207,15 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
         return $visitorResult;
     }
 
-    private function convertArrayObjects($data)
+    private function convertStdClasses($data)
     {
-        if ($data instanceof \ArrayObject) {
-            $data = (array) $data;
+        if ($data instanceof \stdClass) {
+            return array();
         }
+
         if (is_array($data)) {
             foreach ($data as $k => $v) {
-                $data[$k] = $this->convertArrayObjects($v);
+                $data[$k] = $this->convertStdClasses($v);
             }
         }
 
