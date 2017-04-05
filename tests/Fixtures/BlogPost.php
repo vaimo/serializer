@@ -83,14 +83,14 @@ class BlogPost
     private $comments;
 
     /**
-     * @Type("PhpCollection\Sequence<JMS\Serializer\Tests\Fixtures\Comment>")
+     * @Type("ArrayCollection<JMS\Serializer\Tests\Fixtures\Comment>")
      * @XmlList(inline=true, entry="comment2")
      * @Groups({"comments"})
      */
     private $comments2;
 
     /**
-     * @Type("PhpCollection\Map<string,string>")
+     * @Type("ArrayCollection<string,string>")
      * @XmlMap(keyAttribute = "key")
      */
     private $metadata;
@@ -120,8 +120,8 @@ class BlogPost
         $this->publisher = $publisher;
         $this->published = false;
         $this->comments = new ArrayCollection();
-        $this->comments2 = new Sequence();
-        $this->metadata = new Map();
+        $this->comments2 = new ArrayCollection();
+        $this->metadata = new ArrayCollection();
         $this->metadata->set('foo', 'bar');
         $this->createdAt = $createdAt;
         $this->etag = sha1($this->createdAt->format(\DateTime::ISO8601));

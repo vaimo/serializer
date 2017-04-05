@@ -628,7 +628,7 @@ abstract class BaseSerializationTest extends \PHPUnit_Framework_TestCase
             $this->assertAttributeSame(false, 'published', $deserialized);
             $this->assertAttributeSame('1edf9bf60a32d89afbb85b2be849e3ceed5f5b10', 'etag', $deserialized);
             $this->assertAttributeEquals(new ArrayCollection(array($comment)), 'comments', $deserialized);
-            $this->assertAttributeEquals(new Sequence(array($comment)), 'comments2', $deserialized);
+            $this->assertAttributeEquals(new ArrayCollection(array($comment)), 'comments2', $deserialized);
             $this->assertAttributeEquals($author, 'author', $deserialized);
             $this->assertAttributeEquals(array($tag1, $tag2), 'tag', $deserialized);
         }
@@ -1321,7 +1321,6 @@ abstract class BaseSerializationTest extends \PHPUnit_Framework_TestCase
         $this->handlerRegistry->registerSubscribingHandler(new StdClassHandler());
         $this->handlerRegistry->registerSubscribingHandler(new DateHandler());
         $this->handlerRegistry->registerSubscribingHandler(new FormErrorHandler(new IdentityTranslator(new MessageSelector())));
-        $this->handlerRegistry->registerSubscribingHandler(new PhpCollectionHandler());
         $this->handlerRegistry->registerSubscribingHandler(new ArrayCollectionHandler());
         $this->handlerRegistry->registerHandler(GraphNavigator::DIRECTION_SERIALIZATION, 'AuthorList', $this->getFormat(),
             function(VisitorInterface $visitor, $object, array $type, Context $context) {

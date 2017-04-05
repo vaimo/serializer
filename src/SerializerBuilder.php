@@ -164,9 +164,7 @@ class SerializerBuilder
         $this->handlersConfigured = true;
         $this->handlerRegistry->registerSubscribingHandler(new DateHandler());
         $this->handlerRegistry->registerSubscribingHandler(new StdClassHandler());
-        $this->handlerRegistry->registerSubscribingHandler(new PhpCollectionHandler());
         $this->handlerRegistry->registerSubscribingHandler(new ArrayCollectionHandler());
-        $this->handlerRegistry->registerSubscribingHandler(new PropelCollectionHandler());
 
         return $this;
     }
