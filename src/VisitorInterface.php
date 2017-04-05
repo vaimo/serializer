@@ -122,20 +122,14 @@ interface VisitorInterface
     /**
      * Called before serialization/deserialization starts.
      *
-     * @param GraphNavigator $navigator
+     * @param GraphNavigatorInterface $navigator
      *
      * @return void
      */
     public function setNavigator(GraphNavigatorInterface $navigator);
 
     /**
-     * @deprecated use Context::getNavigator/Context::accept instead
-     * @return GraphNavigator
-     */
-    public function getNavigator();
-
-    /**
-     * @return object|array|scalar
+     * @return mixed
      */
     public function getResult();
 }

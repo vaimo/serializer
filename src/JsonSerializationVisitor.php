@@ -38,14 +38,6 @@ class JsonSerializationVisitor extends AbstractVisitor
         $this->dataStack = new \SplStack;
     }
 
-    /**
-     * @return GraphNavigator
-     */
-    public function getNavigator()
-    {
-        return $this->navigator;
-    }
-
     public function visitNull($data, array $type, Context $context)
     {
         return null;
@@ -173,22 +165,6 @@ class JsonSerializationVisitor extends AbstractVisitor
         } else {
             $this->data[$k] = $v;
         }
-    }
-
-    /**
-     * Allows you to add additional data to the current object/root element.
-     * @deprecated use setData instead
-     * @param string $key
-     * @param integer|float|boolean|string|array|null $value This value must either be a regular scalar, or an array.
-     *                                                       It must not contain any objects anymore.
-     */
-    public function addData($key, $value)
-    {
-        if (isset($this->data[$key])) {
-            throw new InvalidArgumentException(sprintf('There is already data for "%s".', $key));
-        }
-
-        $this->data[$key] = $value;
     }
 
     /**

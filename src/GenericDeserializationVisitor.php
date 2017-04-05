@@ -41,11 +41,6 @@ abstract class GenericDeserializationVisitor extends AbstractVisitor
         $this->objectStack = new \SplStack;
     }
 
-    public function getNavigator()
-    {
-        return $this->navigator;
-    }
-
     public function prepare($data)
     {
         return $this->decode($data);
