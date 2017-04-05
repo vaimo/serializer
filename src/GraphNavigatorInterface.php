@@ -31,7 +31,7 @@ interface GraphNavigatorInterface
      *
      * @param mixed $data the data depends on the direction, and type of visitor
      * @param null|array $type array has the format ["name" => string, "params" => array]
-     * @param boolean $isRoot whether or not we are accepting the root
+     * @param Context $context
      *
      * @return mixed the return value depends on the direction, and type of visitor
      */
