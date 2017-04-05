@@ -157,7 +157,7 @@ class JsonSerializationVisitor extends AbstractVisitor
 
     public function visitProperty(PropertyMetadata $metadata, $data, Context $context)
     {
-        $v = $metadata->getValue($data);
+        $v = $this->accessor->getValue($data, $metadata);
 
         $v = $this->navigator->accept($v, $metadata->type, $context);
         if (null === $v && $context->shouldSerializeNull() !== true) {

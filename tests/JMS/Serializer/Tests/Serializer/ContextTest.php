@@ -170,18 +170,6 @@ class ContextTest extends \PHPUnit_Framework_TestCase
         $context->stopVisiting($scalar);
     }
 
-    public function testInitialTypeCompatibility()
-    {
-        $context = SerializationContext::create();
-        $context->setInitialType('foo');
-        $this->assertEquals('foo', $context->getInitialType());
-        $this->assertEquals('foo', $context->attributes->get('initial_type')->get());
-
-        $context = SerializationContext::create();
-        $context->attributes->set('initial_type', 'foo');
-        $this->assertEquals('foo', $context->getInitialType());
-    }
-
     public function testSerializeNullOption()
     {
         $context = SerializationContext::create();

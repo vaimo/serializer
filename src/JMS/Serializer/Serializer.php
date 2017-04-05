@@ -99,15 +99,16 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
         $this->deserializationContextFactory = new DefaultDeserializationContextFactory();
     }
 
-    public function serialize($data, $format, SerializationContext $context = null)
+    public function serialize($data, $format, SerializationContext $context = null, $type = null)
     {
         if (null === $context) {
             $context = $this->serializationContextFactory->createSerializationContext();
         }
 
         return $this->serializationVisitors->get($format)
-            ->map(function(VisitorInterface $visitor) use ($context, $data, $format) {
-                $type = $context->getInitialType() !== null ? $this->typeParser->parse($context->getInitialType()) : null;
+            ->map(function(VisitorInterface $visitor) use ($context, $data, $format, $type) {
+
+                $type = $type !== null ? $this->typeParser->parse($type) : null;
 
                 $this->visit($visitor, $context, $visitor->prepare($data), $format, $type);
 
@@ -137,15 +138,16 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
     /**
      * {@InheritDoc}
      */
-    public function toArray($data, SerializationContext $context = null)
+    public function toArray($data, SerializationContext $context = null, $type = null)
     {
         if (null === $context) {
             $context = $this->serializationContextFactory->createSerializationContext();
         }
 
         return $this->serializationVisitors->get('json')
-            ->map(function(JsonSerializationVisitor $visitor) use ($context, $data) {
-                $type = $context->getInitialType() !== null ? $this->typeParser->parse($context->getInitialType()) : null;
+            ->map(function(JsonSerializationVisitor $visitor) use ($context, $data, $type) {
+
+                $type = $type !== null ? $this->typeParser->parse($type) : null;
 
                 $this->visit($visitor, $context, $data, 'json', $type);
                 $result = $this->convertStdClasses($visitor->getRoot());

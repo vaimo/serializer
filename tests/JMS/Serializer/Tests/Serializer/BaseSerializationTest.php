@@ -1302,9 +1302,9 @@ abstract class BaseSerializationTest extends \PHPUnit_Framework_TestCase
         return true;
     }
 
-    protected function serialize($data, Context $context = null)
+    protected function serialize($data, Context $context = null, $hint = null)
     {
-        return $this->serializer->serialize($data, $this->getFormat(), $context);
+        return $this->serializer->serialize($data, $this->getFormat(), $context, $hint);
     }
 
     protected function deserialize($content, $type, Context $context = null)

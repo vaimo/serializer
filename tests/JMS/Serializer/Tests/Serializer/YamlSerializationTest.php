@@ -66,27 +66,27 @@ class YamlSerializationTest extends BaseSerializationTest
             [['a' => 'a', 'b' => 'b'], "a: a\nb: b\n", null],
 
             [[], " []\n", null],
-            [[], " []\n", SerializationContext::create()->setInitialType('array')],
-            [[], " []\n", SerializationContext::create()->setInitialType('array<integer>')],
-            [[], " {}\n", SerializationContext::create()->setInitialType('array<string,integer>')],
+            [[], " []\n", 'array'],
+            [[], " []\n", 'array<integer>'],
+            [[], " {}\n", 'array<string,integer>'],
 
 
-            [[1, 2], "- 1\n- 2\n", SerializationContext::create()->setInitialType('array')],
-            [[1 => 1, 2 => 2], "1: 1\n2: 2\n", SerializationContext::create()->setInitialType('array')],
-            [[1 => 1, 2 => 2], "- 1\n- 2\n", SerializationContext::create()->setInitialType('array<integer>')],
-            [['a', 'b'],  "- a\n- b\n", SerializationContext::create()->setInitialType('array<string>')],
+            [[1, 2], "- 1\n- 2\n", 'array'],
+            [[1 => 1, 2 => 2], "1: 1\n2: 2\n", 'array'],
+            [[1 => 1, 2 => 2], "- 1\n- 2\n", 'array<integer>'],
+            [['a', 'b'],  "- a\n- b\n", 'array<string>'],
 
-            [[1 => 'a', 2 => 'b'],  "- a\n- b\n", SerializationContext::create()->setInitialType('array<string>')],
-            [['a' => 'a', 'b' => 'b'],  "- a\n- b\n", SerializationContext::create()->setInitialType('array<string>')],
-
-
-            [[1,2], "0: 1\n1: 2\n", SerializationContext::create()->setInitialType('array<integer,integer>')],
-            [[1,2], "0: 1\n1: 2\n", SerializationContext::create()->setInitialType('array<string,integer>')],
-            [[1,2], "0: 1\n1: 2\n", SerializationContext::create()->setInitialType('array<string,string>')],
+            [[1 => 'a', 2 => 'b'],  "- a\n- b\n", 'array<string>'],
+            [['a' => 'a', 'b' => 'b'],  "- a\n- b\n", 'array<string>'],
 
 
-            [['a', 'b'], "0: a\n1: b\n", SerializationContext::create()->setInitialType('array<integer,string>')],
-            [['a' => 'a', 'b' => 'b'],  "a: a\nb: b\n", SerializationContext::create()->setInitialType('array<string,string>')],
+            [[1,2], "0: 1\n1: 2\n", 'array<integer,integer>'],
+            [[1,2], "0: 1\n1: 2\n", 'array<string,integer>'],
+            [[1,2], "0: 1\n1: 2\n", 'array<string,string>'],
+
+
+            [['a', 'b'], "0: a\n1: b\n", 'array<integer,string>'],
+            [['a' => 'a', 'b' => 'b'],  "a: a\nb: b\n", 'array<string,string>'],
         ];
     }
 
@@ -94,11 +94,11 @@ class YamlSerializationTest extends BaseSerializationTest
      * @dataProvider getTypeHintedArrays
      * @param array $array
      * @param string $expected
-     * @param SerializationContext|null $context
+     * @param string|null $hint
      */
-    public function testTypeHintedArraySerialization(array $array, $expected, $context = null)
+    public function testTypeHintedArraySerialization(array $array, $expected, $hint = null)
     {
-        $this->assertEquals($expected, $this->serialize($array, $context));
+        $this->assertEquals($expected, $this->serialize($array, null, $hint));
     }
 
 
