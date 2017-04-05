@@ -22,6 +22,9 @@ use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\Exception\InvalidArgumentException;
 use JMS\Serializer\Metadata\PropertyMetadata;
 
+/**
+ * @deprecated
+ */
 abstract class GenericSerializationVisitor extends AbstractVisitor
 {
     private $navigator;
@@ -111,7 +114,9 @@ abstract class GenericSerializationVisitor extends AbstractVisitor
                 continue;
             }
 
-            if ($isList) {
+            if ($isHash) {
+                $rs->$k = $v;
+            } elseif ($isList) {
                 $rs[] = $v;
             } else {
                 $rs[$k] = $v;

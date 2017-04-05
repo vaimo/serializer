@@ -30,11 +30,6 @@ class SerializationContext extends Context
     /** @var \SplStack */
     private $visitingStack;
 
-    /**
-     * @var string
-     */
-    private $initialType;
-
     public static function create()
     {
         return new self();
@@ -119,26 +114,5 @@ class SerializationContext extends Context
     public function getVisitingSet()
     {
         return $this->visitingSet;
-    }
-
-    /**
-     * @param string $type
-     * @return $this
-     */
-    public function setInitialType($type)
-    {
-        $this->initialType = $type;
-        $this->attributes->set('initial_type', $type);
-        return $this;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getInitialType()
-    {
-        return $this->initialType
-            ? $this->initialType
-            : $this->attributes->containsKey('initial_type') ? $this->attributes->get('initial_type')->get() : null;
     }
 }
