@@ -250,7 +250,7 @@ class XmlSerializationTest extends BaseSerializationTest
     public function testDateTimeNoCData($key, $value, $type)
     {
         $handlerRegistry = new HandlerRegistry();
-        $handlerRegistry->registerSubscribingHandler(new DateHandler(\DateTime::ATOM, 'UTC', false));
+        $handlerRegistry->registerSubscribingHandler(new DateHandler(\DateTime::RFC3339, 'UTC', false));
         $objectConstructor = new UnserializeObjectConstructor();
 
         $serializer = new Serializer($this->factory, $handlerRegistry, $objectConstructor, $this->serializationVisitors, $this->deserializationVisitors);
@@ -265,7 +265,7 @@ class XmlSerializationTest extends BaseSerializationTest
     public function testDateTimeImmutableNoCData($key, $value, $type)
     {
         $handlerRegistry = new HandlerRegistry();
-        $handlerRegistry->registerSubscribingHandler(new DateHandler(\DateTime::ATOM, 'UTC', false));
+        $handlerRegistry->registerSubscribingHandler(new DateHandler(\DateTime::RFC3339, 'UTC', false));
         $objectConstructor = new UnserializeObjectConstructor();
 
         $serializer = new Serializer($this->factory, $handlerRegistry, $objectConstructor, $this->serializationVisitors, $this->deserializationVisitors);
