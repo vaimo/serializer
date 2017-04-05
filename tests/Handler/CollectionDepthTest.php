@@ -35,9 +35,6 @@ class CollectionDepthTest extends \PHPUnit_Framework_TestCase
         return [
             [$data],
             [new \Doctrine\Common\Collections\ArrayCollection($data)],
-            [new \PropelObjectCollection($data)],
-            [new \PhpCollection\Sequence($data)],
-            [new \PhpCollection\Map($data)],
         ];
     }
 }
