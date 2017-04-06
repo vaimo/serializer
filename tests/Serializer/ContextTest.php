@@ -173,7 +173,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase
     public function testSerializeNullOption()
     {
         $context = SerializationContext::create();
-        $this->assertNull($context->shouldSerializeNull());
+        $this->assertFalse($context->shouldSerializeNull());
 
         $context->setSerializeNull(false);
         $this->assertFalse($context->shouldSerializeNull());
