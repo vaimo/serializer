@@ -47,7 +47,6 @@ class EventDispatcherTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($this->dispatcher->hasListeners('baz', 'Bar', 'xml'));
         $this->dispatcher->addListener('baz', function() { }, 'Bar');
         $this->assertTrue($this->dispatcher->hasListeners('baz', 'Bar', 'xml'));
-        $this->assertTrue($this->dispatcher->hasListeners('baz', 'bAr', 'xml'));
     }
 
     public function testDispatch()
