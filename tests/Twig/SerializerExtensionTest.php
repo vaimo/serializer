@@ -21,11 +21,11 @@ namespace JMS\Serializer\Tests\Twig;
 use JMS\Serializer\SerializerInterface;
 use JMS\Serializer\Twig\SerializerExtension;
 
-class SerializerExtensionTest extends \PHPUnit_Framework_TestCase
+class SerializerExtensionTest extends \PHPUnit\Framework\TestCase
 {
     public function setUp()
     {
-        $this->mockSerializer = $this->getMock('JMS\Serializer\SerializerInterface');
+        $this->mockSerializer = $this->getMockBuilder('JMS\Serializer\SerializerInterface')->getMock();
     }
 
     public function testSerialize()

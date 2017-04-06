@@ -21,7 +21,7 @@ namespace JMS\Serializer\Tests\Metadata;
 use JMS\Serializer\Metadata\PropertyMetadata;
 use JMS\Serializer\Metadata\ClassMetadata;
 
-class ClassMetadataTest extends \PHPUnit_Framework_TestCase
+class ClassMetadataTest extends \PHPUnit\Framework\TestCase
 {
     public function getAccessOrderCases()
     {
@@ -85,11 +85,13 @@ class ClassMetadataTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @expectedException
      * @dataProvider providerPublicMethodException
      */
     public function testAccessorTypePublicMethodException($getter, $setter, $message)
     {
-        $this->setExpectedException('\JMS\Serializer\Exception\RuntimeException', $message);
+        $this->expectException('\JMS\Serializer\Exception\RuntimeException');
+        $this->expectExceptionMessage($message);
 
         $object = new PropertyMetadataPublicMethod();
 

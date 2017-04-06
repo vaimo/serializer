@@ -32,7 +32,7 @@ use JMS\Serializer\Naming\CamelCaseNamingStrategy;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
 
-class SerializationContextFactoryTest extends \PHPUnit_Framework_TestCase
+class SerializationContextFactoryTest extends \PHPUnit\Framework\TestCase
 {
     protected $serializer;
 

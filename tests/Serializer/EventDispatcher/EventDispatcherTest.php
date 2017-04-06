@@ -22,8 +22,9 @@ use JMS\Serializer\EventDispatcher\Event;
 use JMS\Serializer\EventDispatcher\EventDispatcher;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
+use PHPUnit\Framework\Assert;
 
-class EventDispatcherTest extends \PHPUnit_Framework_TestCase
+class EventDispatcherTest extends \PHPUnit\Framework\TestCase
 {
     private $dispatcher;
     private $event;
@@ -93,7 +94,7 @@ class EventDispatcherTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->dispatcher = new EventDispatcher();
-        $this->event = new ObjectEvent($this->getMock('JMS\Serializer\Context'), new \stdClass(), array('name' => 'foo', 'params' => array()));
+        $this->event = new ObjectEvent($this->getMockBuilder('JMS\Serializer\Context')->getMock(), new \stdClass(), array('name' => 'foo', 'params' => array()));
     }
 
     private function dispatch($eventName, $class = 'Foo', $format = 'json', Event $event = null)
@@ -136,6 +137,6 @@ class MockListener
 
     public function _verify($message = null)
     {
-        \PHPUnit_Framework_Assert::assertSame($this->expected, $this->actual, $message);
+        Assert::assertSame($this->expected, $this->actual, $message);
     }
 }

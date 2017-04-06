@@ -30,7 +30,7 @@ use JMS\Serializer\Naming\CamelCaseNamingStrategy;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
 
-class SerializerBuilderTest extends \PHPUnit_Framework_TestCase
+class SerializerBuilderTest extends \PHPUnit\Framework\TestCase
 {
     /** @var SerializerBuilder */
     private $builder;

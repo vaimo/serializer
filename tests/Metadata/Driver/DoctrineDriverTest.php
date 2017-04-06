@@ -25,7 +25,7 @@ use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver as DoctrineDriver;
 
-class DoctrineDriverTest extends \PHPUnit_Framework_TestCase
+class DoctrineDriverTest extends \PHPUnit\Framework\TestCase
 {
     public function getMetadata()
     {
@@ -130,7 +130,7 @@ class DoctrineDriverTest extends \PHPUnit_Framework_TestCase
 
     protected function getDoctrineDriver()
     {
-        $registry = $this->getMock('Doctrine\Common\Persistence\ManagerRegistry');
+        $registry = $this->getMockBuilder('Doctrine\Common\Persistence\ManagerRegistry')->getMock();
         $registry->expects($this->atLeastOnce())
              ->method('getManagerForClass')
              ->will($this->returnValue($this->getEntityManager()));

@@ -7,7 +7,7 @@ use JMS\Serializer\Exclusion\DepthExclusionStrategy;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerBuilder;
 
-class CollectionDepthTest extends \PHPUnit_Framework_TestCase
+class CollectionDepthTest extends \PHPUnit\Framework\TestCase
 {
 
     /** @var \JMS\Serializer\Serializer */

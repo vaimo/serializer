@@ -26,7 +26,7 @@ use JMS\Serializer\Tests\Fixtures\InlineChild;
 use JMS\Serializer\Tests\Fixtures\Node;
 use JMS\Serializer\SerializerBuilder;
 
-class ContextTest extends \PHPUnit_Framework_TestCase
+class ContextTest extends \PHPUnit\Framework\TestCase
 {
     public function testSerializationContextPathAndDepth()
     {
@@ -40,7 +40,7 @@ class ContextTest extends \PHPUnit_Framework_TestCase
 
         $self = $this;
 
-        $exclusionStrategy = $this->getMock('JMS\Serializer\Exclusion\ExclusionStrategyInterface');
+        $exclusionStrategy = $this->getMockBuilder('JMS\Serializer\Exclusion\ExclusionStrategyInterface')->getMock();
         $exclusionStrategy->expects($this->any())
             ->method('shouldSkipClass')
             ->with($this->anything(), $this->callback(function (SerializationContext $context) use ($self, $objects) {
@@ -105,7 +105,7 @@ class ContextTest extends \PHPUnit_Framework_TestCase
         ));
         $self = $this;
 
-        $exclusionStrategy = $this->getMock('JMS\Serializer\Exclusion\ExclusionStrategyInterface');
+        $exclusionStrategy = $this->getMockBuilder('JMS\Serializer\Exclusion\ExclusionStrategyInterface')->getMock();
         $exclusionStrategy->expects($this->any())
             ->method('shouldSkipClass')
             ->will($this->returnCallback(function (ClassMetadata $classMetadata, SerializationContext $context) use ($self, $object, $child) {

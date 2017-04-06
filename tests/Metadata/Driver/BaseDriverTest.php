@@ -26,7 +26,7 @@ use JMS\Serializer\Tests\Fixtures\Discriminator\ObjectWithXmlAttributeDiscrimina
 use JMS\Serializer\Tests\Fixtures\Discriminator\ObjectWithXmlAttributeDiscriminatorParent;
 use Metadata\Driver\DriverInterface;
 
-abstract class BaseDriverTest extends \PHPUnit_Framework_TestCase
+abstract class BaseDriverTest extends \PHPUnit\Framework\TestCase
 {
     public function testLoadBlogPostMetadata()
     {

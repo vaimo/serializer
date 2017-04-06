@@ -6,7 +6,7 @@ namespace JMS\Serializer\Tests\Serializer\Naming;
 use JMS\Serializer\Naming\CamelCaseNamingStrategy;
 
 
-class CamelCaseNamingStrategyTest extends \PHPUnit_Framework_TestCase {
+class CamelCaseNamingStrategyTest extends \PHPUnit\Framework\TestCase {
 
     public function providePropertyNames() {
         return array(
