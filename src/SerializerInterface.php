@@ -30,7 +30,7 @@ interface SerializerInterface
      *
      * @param object|array|scalar $data
      * @param string $format
-     * @param Context $context
+     * @param SerializationContext $context
      *
      * @return string
      */
@@ -42,9 +42,9 @@ interface SerializerInterface
      * @param string $data
      * @param string $type
      * @param string $format
-     * @param Context $context
+     * @param DeserializationContext $context
      *
-     * @return object|array|scalar
+     * @return mixed
      */
     public function deserialize($data, $type, $format, DeserializationContext $context = null);
 }
