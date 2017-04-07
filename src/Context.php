@@ -81,11 +81,6 @@ abstract class Context
         $this->metadataStack = new \SplStack();
     }
 
-    public function accept($data, array $type = null)
-    {
-        return $this->navigator->accept($data, $type, $this);
-    }
-
     public function getMetadataFactory()
     {
         return $this->metadataFactory;
