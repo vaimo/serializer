@@ -112,13 +112,23 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
         return $this->serializationVisitors->get($format)
             ->map(function (SerializationVisitorInterface $visitor) use ($context, $data, $format, $type) {
 
-                $type = $type !== null ? $this->typeParser->parse($type) : null;
+                $type = $this->findInitialType($type, $context);
 
                 $this->visit($this->serializationNavigator, $visitor, $context, $visitor->prepare($data), $format, $type);
 
                 return $visitor->getResult();
             })
             ->getOrThrow(new UnsupportedFormatException(sprintf('The format "%s" is not supported for serialization.', $format)));
+    }
+
+    private function findInitialType($type, SerializationContext $context)
+    {
+        if ($type !== null) {
+            return $this->typeParser->parse($type);
+        } elseif ($context->attributes->containsKey('initial_type')) {
+            return $this->typeParser->parse($context->attributes->get('initial_type')->get());
+        }
+        return null;
     }
 
     public function deserialize($data, $type, $format, DeserializationContext $context = null)
@@ -147,7 +157,7 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
         return $this->serializationVisitors->get('json')
             ->map(function (JsonSerializationVisitor $visitor) use ($context, $data, $type) {
 
-                $type = $type !== null ? $this->typeParser->parse($type) : null;
+                $type = $this->findInitialType($type, $context);
 
                 $this->visit($this->serializationNavigator, $visitor, $context, $data, 'json', $type);
                 $result = $this->removeInternalArrayObjects($visitor->getRoot());

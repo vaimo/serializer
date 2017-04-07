@@ -23,6 +23,7 @@ use JMS\Serializer\EventDispatcher\Event;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\Exception\RuntimeException;
 use JMS\Serializer\GraphNavigator;
+use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializationVisitorInterface;
 use JMS\Serializer\Tests\Fixtures\Author;
 use JMS\Serializer\Tests\Fixtures\AuthorList;
@@ -334,6 +335,10 @@ class JsonSerializationTest extends BaseSerializationTest
         $this->assertEquals('[{"full_name":"Jim"},{"full_name":"Mark"}]', $this->serializer->serialize($data, $this->getFormat(), null, 'array'));
         $this->assertEquals('{"0":{"full_name":"Jim"},"1":{"full_name":"Mark"}}', $this->serializer->serialize($data, $this->getFormat(), null, 'array<int,JMS\Serializer\Tests\Fixtures\Author>'));
         $this->assertEquals('{"0":{"full_name":"Jim"},"1":{"full_name":"Mark"}}', $this->serializer->serialize($data, $this->getFormat(), null, 'array<string,JMS\Serializer\Tests\Fixtures\Author>'));
+
+        $context = SerializationContext::create();
+        $context->attributes->set('initial_type', 'array<string,JMS\Serializer\Tests\Fixtures\Author>');
+        $this->assertEquals('{"0":{"full_name":"Jim"},"1":{"full_name":"Mark"}}', $this->serializer->serialize($data, $this->getFormat(), $context));
     }
 
     public function getTypeHintedArrays()
