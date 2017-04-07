@@ -171,17 +171,6 @@ final class SerializationGraphNavigator extends GraphNavigator implements GraphN
                 }
                 $object = $data;
 
-                if (isset($metadata->handlerCallbacks[$context->getDirection()][$context->getFormat()])) {
-                    $rs = $object->{$metadata->handlerCallbacks[$context->getDirection()][$context->getFormat()]}(
-                        $visitor,
-                        null,
-                        $context
-                    );
-                    $this->afterVisitingObject($metadata, $object, $type, $context);
-
-                    return $rs;
-                }
-
                 $visitor->startVisitingObject($metadata, $object, $type, $context);
                 foreach ($metadata->propertyMetadata as $propertyMetadata) {
                     if (null !== $exclusionStrategy && $exclusionStrategy->shouldSkipProperty($propertyMetadata, $context)) {

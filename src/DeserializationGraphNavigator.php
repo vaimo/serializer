@@ -150,18 +150,6 @@ final class DeserializationGraphNavigator extends GraphNavigator implements Grap
 
                 $object = $this->objectConstructor->construct($visitor, $metadata, $data, $type, $context);
 
-
-                if (isset($metadata->handlerCallbacks[$context->getDirection()][$context->getFormat()])) {
-                    $rs = $object->{$metadata->handlerCallbacks[$context->getDirection()][$context->getFormat()]}(
-                        $visitor,
-                        $data,
-                        $context
-                    );
-                    $this->afterVisitingObject($metadata, $object, $type, $context);
-
-                    return $object;
-                }
-
                 $visitor->startVisitingObject($metadata, $object, $type, $context);
                 foreach ($metadata->propertyMetadata as $propertyMetadata) {
                     if (null !== $exclusionStrategy && $exclusionStrategy->shouldSkipProperty($propertyMetadata, $context)) {
