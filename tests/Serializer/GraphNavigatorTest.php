@@ -19,12 +19,14 @@
 namespace JMS\Serializer\Tests\Serializer;
 
 use JMS\Serializer\Construction\UnserializeObjectConstructor;
+use JMS\Serializer\DeserializationVisitorInterface;
 use JMS\Serializer\Handler\HandlerRegistry;
 use JMS\Serializer\EventDispatcher\EventDispatcher;
 use Doctrine\Common\Annotations\AnnotationReader;
 use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\Metadata\Driver\AnnotationDriver;
 use JMS\Serializer\GraphNavigator;
+use JMS\Serializer\SerializationVisitorInterface;
 use Metadata\MetadataFactory;
 use PHPUnit\Framework\TestCase;
 
@@ -81,7 +83,7 @@ class GraphNavigatorTest extends TestCase
 
         $this->context->expects($this->any())
             ->method('getVisitor')
-            ->will($this->returnValue($this->getMockBuilder('JMS\Serializer\VisitorInterface')->getMock()));
+            ->will($this->returnValue($this->getMockBuilder(SerializationVisitorInterface::class)->getMock()));
 
         $this->navigator = new GraphNavigator($this->metadataFactory, $this->handlerRegistry, $this->objectConstructor, $this->dispatcher);
         $this->navigator->accept($object, null, $this->context);
@@ -116,7 +118,7 @@ class GraphNavigatorTest extends TestCase
 
         $this->context->expects($this->any())
             ->method('getVisitor')
-            ->will($this->returnValue($this->getMockBuilder('JMS\Serializer\VisitorInterface')->getMock()));
+            ->will($this->returnValue($this->getMockBuilder(DeserializationVisitorInterface::class)->getMock()));
 
         $this->navigator = new GraphNavigator($this->metadataFactory, $this->handlerRegistry, $this->objectConstructor, $this->dispatcher);
         $this->navigator->accept('random', array('name' => $class, 'params' => array()), $this->context);
@@ -141,7 +143,7 @@ class GraphNavigatorTest extends TestCase
 
         $this->context->expects($this->any())
             ->method('getVisitor')
-            ->will($this->returnValue($this->getMockBuilder('JMS\Serializer\VisitorInterface')->getMock()));
+            ->will($this->returnValue($this->getMockBuilder(SerializationVisitorInterface::class)->getMock()));
 
         $this->navigator = new GraphNavigator($this->metadataFactory, $this->handlerRegistry, $this->objectConstructor, $this->dispatcher);
         $this->navigator->accept($object, null, $this->context);

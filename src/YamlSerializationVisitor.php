@@ -31,7 +31,7 @@ use JMS\Serializer\Util\Writer;
  * @see http://www.yaml.org/spec/
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-class YamlSerializationVisitor extends AbstractVisitor
+class YamlSerializationVisitor extends AbstractVisitor implements SerializationVisitorInterface
 {
     public $writer;
 

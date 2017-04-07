@@ -22,6 +22,7 @@ use JMS\Serializer\Accessor\DefaultAccessorStrategy;
 use JMS\Serializer\Accessor\ExpressionAccessorStrategy;
 use JMS\Serializer\Context;
 use JMS\Serializer\DeserializationContext;
+use JMS\Serializer\DeserializationVisitorInterface;
 use JMS\Serializer\Exclusion\GroupsExclusionStrategy;
 use JMS\Serializer\Expression\ExpressionEvaluator;
 use JMS\Serializer\GraphNavigator;
@@ -29,6 +30,7 @@ use JMS\Serializer\Handler\PhpCollectionHandler;
 use JMS\Serializer\Handler\StdClassHandler;
 use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializationVisitorInterface;
 use JMS\Serializer\Tests\Fixtures\AuthorExpressionAccess;
 use JMS\Serializer\Tests\Fixtures\DateTimeArraysObject;
 use JMS\Serializer\Tests\Fixtures\Discriminator\Car;
@@ -70,7 +72,6 @@ use JMS\Serializer\JsonSerializationVisitor;
 use JMS\Serializer\Naming\CamelCaseNamingStrategy;
 use JMS\Serializer\Naming\SerializedNameAnnotationStrategy;
 use JMS\Serializer\Serializer;
-use JMS\Serializer\VisitorInterface;
 use JMS\Serializer\XmlDeserializationVisitor;
 use JMS\Serializer\XmlSerializationVisitor;
 use JMS\Serializer\YamlSerializationVisitor;
@@ -1365,12 +1366,12 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
         $this->handlerRegistry->registerSubscribingHandler(new FormErrorHandler(new IdentityTranslator(new MessageSelector())));
         $this->handlerRegistry->registerSubscribingHandler(new ArrayCollectionHandler());
         $this->handlerRegistry->registerHandler(GraphNavigator::DIRECTION_SERIALIZATION, 'AuthorList', $this->getFormat(),
-            function(VisitorInterface $visitor, $object, array $type, Context $context) {
+            function(SerializationVisitorInterface $visitor, $object, array $type, Context $context) {
                 return $visitor->visitArray(iterator_to_array($object), $type, $context);
             }
         );
         $this->handlerRegistry->registerHandler(GraphNavigator::DIRECTION_DESERIALIZATION, 'AuthorList', $this->getFormat(),
-            function(VisitorInterface $visitor, $data, $type, Context $context) {
+            function(DeserializationVisitorInterface $visitor, $data, $type, Context $context) {
                 $type = array(
                     'name' => 'array',
                     'params' => array(
@@ -1440,7 +1441,7 @@ class ArrayObjectHandler implements SubscribingHandlerInterface
         return $methods;
     }
 
-    public function deserializeArrayObject(VisitorInterface $visitor, $data, array $type, Context $context)
+    public function deserializeArrayObject(DeserializationVisitorInterface $visitor, $data, array $type, Context $context)
     {
         return new \ArrayObject($visitor->visitArray($data, $type, $context));
     }

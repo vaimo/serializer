@@ -107,7 +107,7 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
         }
 
         return $this->serializationVisitors->get($format)
-            ->map(function(VisitorInterface $visitor) use ($context, $data, $format, $type) {
+            ->map(function(SerializationVisitorInterface $visitor) use ($context, $data, $format, $type) {
 
                 $type = $type !== null ? $this->typeParser->parse($type) : null;
 
@@ -126,7 +126,7 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
         }
 
         return $this->deserializationVisitors->get($format)
-            ->map(function(VisitorInterface $visitor) use ($context, $data, $format, $type) {
+            ->map(function(DeserializationVisitorInterface $visitor) use ($context, $data, $format, $type) {
                 $preparedData = $visitor->prepare($data);
                 return $this->visit($visitor, $context, $preparedData, $format, $this->typeParser->parse($type));
             })
@@ -182,7 +182,7 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
         ;
     }
 
-    private function visit(VisitorInterface $visitor, Context $context, $data, $format, array $type = null)
+    private function visit($visitor, Context $context, $data, $format, array $type = null)
     {
         $context->initialize(
             $format,

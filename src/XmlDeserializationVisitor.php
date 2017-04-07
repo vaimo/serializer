@@ -25,7 +25,7 @@ use JMS\Serializer\Exception\RuntimeException;
 use JMS\Serializer\Metadata\PropertyMetadata;
 use JMS\Serializer\Metadata\ClassMetadata;
 
-class XmlDeserializationVisitor extends AbstractVisitor
+class XmlDeserializationVisitor extends AbstractVisitor  implements DeserializationVisitorInterface
 {
     private $objectStack;
     private $metadataStack;

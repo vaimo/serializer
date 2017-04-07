@@ -26,7 +26,6 @@ use JMS\Serializer\Exclusion\GroupsExclusionStrategy;
 use JMS\Serializer\Exclusion\VersionExclusionStrategy;
 use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\Metadata\PropertyMetadata;
-use Metadata\MetadataFactory;
 use Metadata\MetadataFactoryInterface;
 use PhpCollection\Map;
 
@@ -39,13 +38,13 @@ abstract class Context
 
     private $format;
 
-    /** @var VisitorInterface */
+    /** @var SerializationVisitorInterface|DeserializationVisitorInterface */
     private $visitor;
 
     /** @var GraphNavigatorInterface */
     private $navigator;
 
-    /** @var MetadataFactory */
+    /** @var MetadataFactoryInterface */
     private $metadataFactory;
 
     /** @var ExclusionStrategyInterface */
@@ -64,10 +63,14 @@ abstract class Context
         $this->attributes = new Map();
     }
 
+
     /**
      * @param string $format
+     * @param SerializationVisitorInterface|DeserializationVisitorInterface $visitor
+     * @param GraphNavigatorInterface $navigator
+     * @param MetadataFactoryInterface $factory
      */
-    public function initialize($format, VisitorInterface $visitor, GraphNavigatorInterface $navigator, MetadataFactoryInterface $factory)
+    protected function initializeBasicContext($format, $visitor, GraphNavigatorInterface $navigator, MetadataFactoryInterface $factory)
     {
         if ($this->initialized) {
             throw new \LogicException('This context was already initialized, and cannot be re-used.');

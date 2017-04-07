@@ -22,7 +22,7 @@ use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\Metadata\PropertyMetadata;
 use JMS\Serializer\Util\ArrayObject;
 
-class JsonSerializationVisitor extends AbstractVisitor
+class JsonSerializationVisitor extends AbstractVisitor implements SerializationVisitorInterface
 {
     private $options = 0;
 

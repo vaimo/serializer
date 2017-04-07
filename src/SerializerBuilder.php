@@ -207,7 +207,7 @@ class SerializerBuilder
         return $this;
     }
 
-    public function setSerializationVisitor($format, VisitorInterface $visitor)
+    public function setSerializationVisitor($format, SerializationVisitorInterface $visitor)
     {
         $this->visitorsAdded = true;
         $this->serializationVisitors->set($format, $visitor);
@@ -215,7 +215,7 @@ class SerializerBuilder
         return $this;
     }
 
-    public function setDeserializationVisitor($format, VisitorInterface $visitor)
+    public function setDeserializationVisitor($format, DeserializationVisitorInterface $visitor)
     {
         $this->visitorsAdded = true;
         $this->deserializationVisitors->set($format, $visitor);

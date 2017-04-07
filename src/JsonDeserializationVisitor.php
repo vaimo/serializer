@@ -27,7 +27,7 @@ use JMS\Serializer\Metadata\ClassMetadata;
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-class JsonDeserializationVisitor extends AbstractVisitor
+class JsonDeserializationVisitor extends AbstractVisitor implements DeserializationVisitorInterface
 {
     private $navigator;
     private $objectStack;

@@ -23,11 +23,10 @@ use JMS\Serializer\Exception\RuntimeException;
 use JMS\Serializer\EventDispatcher\Event;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\GraphNavigator;
+use JMS\Serializer\SerializationVisitorInterface;
 use JMS\Serializer\Tests\Fixtures\Tag;
-use JMS\Serializer\VisitorInterface;
 use JMS\Serializer\Tests\Fixtures\Author;
 use JMS\Serializer\Tests\Fixtures\AuthorList;
-use JMS\Serializer\SerializationContext;
 
 class JsonSerializationTest extends BaseSerializationTest
 {
@@ -133,7 +132,7 @@ class JsonSerializationTest extends BaseSerializationTest
         }, 'JMS\Serializer\Tests\Fixtures\Author', 'json');
 
         $this->handlerRegistry->registerHandler(GraphNavigator::DIRECTION_SERIALIZATION, 'JMS\Serializer\Tests\Fixtures\AuthorList', 'json',
-            function(VisitorInterface $visitor, AuthorList $data, array $type, Context $context) {
+            function(SerializationVisitorInterface $visitor, AuthorList $data, array $type, Context $context) {
                 return $visitor->visitArray(iterator_to_array($data), $type, $context);
             }
         );
@@ -149,7 +148,7 @@ class JsonSerializationTest extends BaseSerializationTest
     {
         $this->dispatcher->addSubscriber(new ReplaceNameSubscriber());
         $this->handlerRegistry->registerHandler(GraphNavigator::DIRECTION_SERIALIZATION, 'JMS\Serializer\Tests\Fixtures\AuthorList', 'json',
-            function(VisitorInterface $visitor, AuthorList $data, array $type, Context $context) {
+            function(SerializationVisitorInterface $visitor, AuthorList $data, array $type, Context $context) {
                 return $visitor->visitArray(iterator_to_array($data), $type, $context);
             }
         );

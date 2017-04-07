@@ -18,9 +18,23 @@
 
 namespace JMS\Serializer;
 
+use Metadata\MetadataFactoryInterface;
+
 class DeserializationContext extends Context
 {
     private $depth = 0;
+
+
+    /**
+     * @param string $format
+     * @param DeserializationVisitorInterface $visitor
+     * @param GraphNavigatorInterface $navigator
+     * @param MetadataFactoryInterface $factory
+     */
+    public function initialize($format, DeserializationVisitorInterface $visitor, GraphNavigatorInterface $navigator, MetadataFactoryInterface $factory)
+    {
+        $this->initializeBasicContext($format, $visitor, $navigator, $factory);
+    }
 
     public static function create()
     {

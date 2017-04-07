@@ -21,7 +21,7 @@ class FormErrorHandlerTest extends \PHPUnit\Framework\TestCase
     protected $handler;
 
     /**
-     * @var \JMS\Serializer\VisitorInterface
+     * @var \JMS\Serializer\SerializationVisitorInterface
      */
     protected $visitor;
 
