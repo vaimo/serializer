@@ -24,10 +24,10 @@ namespace JMS\Serializer\Util;
  */
 final class ArrayObject extends \ArrayObject
 {
-    public function merge(iterable $arrayObject) : void
+    public function merge(iterable $arrayObject): void
     {
         foreach ($arrayObject as $key => $value) {
-            if (!isset($this[$key])){
+            if (!isset($this[$key])) {
                 $this[$key] = $value;
             }
         }

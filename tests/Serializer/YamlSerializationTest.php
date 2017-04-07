@@ -19,7 +19,6 @@
 namespace JMS\Serializer\Tests\Serializer;
 
 use JMS\Serializer\Exception\RuntimeException;
-use JMS\Serializer\SerializationContext;
 
 class YamlSerializationTest extends BaseSerializationTest
 {
@@ -50,7 +49,7 @@ class YamlSerializationTest extends BaseSerializationTest
 
     protected function getContent($key)
     {
-        if (!file_exists($file = __DIR__.'/yml/'.$key.'.yml')) {
+        if (!file_exists($file = __DIR__ . '/yml/' . $key . '.yml')) {
             throw new RuntimeException(sprintf('The content with key "%s" does not exist.', $key));
         }
 
@@ -74,19 +73,19 @@ class YamlSerializationTest extends BaseSerializationTest
             [[1, 2], "- 1\n- 2\n", 'array'],
             [[1 => 1, 2 => 2], "1: 1\n2: 2\n", 'array'],
             [[1 => 1, 2 => 2], "- 1\n- 2\n", 'array<integer>'],
-            [['a', 'b'],  "- a\n- b\n", 'array<string>'],
+            [['a', 'b'], "- a\n- b\n", 'array<string>'],
 
-            [[1 => 'a', 2 => 'b'],  "- a\n- b\n", 'array<string>'],
-            [['a' => 'a', 'b' => 'b'],  "- a\n- b\n", 'array<string>'],
+            [[1 => 'a', 2 => 'b'], "- a\n- b\n", 'array<string>'],
+            [['a' => 'a', 'b' => 'b'], "- a\n- b\n", 'array<string>'],
 
 
-            [[1,2], "0: 1\n1: 2\n", 'array<integer,integer>'],
-            [[1,2], "0: 1\n1: 2\n", 'array<string,integer>'],
-            [[1,2], "0: 1\n1: 2\n", 'array<string,string>'],
+            [[1, 2], "0: 1\n1: 2\n", 'array<integer,integer>'],
+            [[1, 2], "0: 1\n1: 2\n", 'array<string,integer>'],
+            [[1, 2], "0: 1\n1: 2\n", 'array<string,string>'],
 
 
             [['a', 'b'], "0: a\n1: b\n", 'array<integer,string>'],
-            [['a' => 'a', 'b' => 'b'],  "a: a\nb: b\n", 'array<string,string>'],
+            [['a' => 'a', 'b' => 'b'], "a: a\nb: b\n", 'array<string,string>'],
         ];
     }
 

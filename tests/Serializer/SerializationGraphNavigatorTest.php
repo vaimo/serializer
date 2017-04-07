@@ -18,12 +18,12 @@
 
 namespace JMS\Serializer\Tests\Serializer;
 
-use JMS\Serializer\Handler\HandlerRegistry;
-use JMS\Serializer\EventDispatcher\EventDispatcher;
 use Doctrine\Common\Annotations\AnnotationReader;
+use JMS\Serializer\EventDispatcher\EventDispatcher;
+use JMS\Serializer\GraphNavigator;
+use JMS\Serializer\Handler\HandlerRegistry;
 use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\Metadata\Driver\AnnotationDriver;
-use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializationGraphNavigator;
 use JMS\Serializer\SerializationVisitorInterface;
@@ -62,13 +62,13 @@ class SerializationGraphNavigatorTest extends TestCase
         $exclusionStrategy = $this->getMockBuilder('JMS\Serializer\Exclusion\ExclusionStrategyInterface')->getMock();
         $exclusionStrategy->expects($this->once())
             ->method('shouldSkipClass')
-            ->will($this->returnCallback(function($passedMetadata, $passedContext) use ($metadata, $context, $self) {
+            ->will($this->returnCallback(function ($passedMetadata, $passedContext) use ($metadata, $context, $self) {
                 $self->assertSame($metadata, $passedMetadata);
                 $self->assertSame($context, $passedContext);
             }));
         $exclusionStrategy->expects($this->once())
             ->method('shouldSkipProperty')
-            ->will($this->returnCallback(function($propertyMetadata, $passedContext) use ($context, $metadata, $self) {
+            ->will($this->returnCallback(function ($propertyMetadata, $passedContext) use ($context, $metadata, $self) {
                 $self->assertSame($metadata->propertyMetadata['foo'], $propertyMetadata);
                 $self->assertSame($context, $passedContext);
             }));
@@ -94,7 +94,7 @@ class SerializationGraphNavigatorTest extends TestCase
         $object = new SerializableClass;
         $typeName = 'JsonSerializable';
 
-        $this->dispatcher->addListener('serializer.pre_serialize', function($event) use ($typeName) {
+        $this->dispatcher->addListener('serializer.pre_serialize', function ($event) use ($typeName) {
             $type = $event->getType();
             $type['name'] = $typeName;
             $event->setType($type['name'], $type['params']);

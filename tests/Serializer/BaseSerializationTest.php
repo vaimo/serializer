@@ -18,104 +18,104 @@
 
 namespace JMS\Serializer\Tests\Serializer;
 
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Accessor\DefaultAccessorStrategy;
 use JMS\Serializer\Accessor\ExpressionAccessorStrategy;
+use JMS\Serializer\Construction\UnserializeObjectConstructor;
 use JMS\Serializer\Context;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\DeserializationVisitorInterface;
+use JMS\Serializer\EventDispatcher\EventDispatcher;
+use JMS\Serializer\EventDispatcher\Subscriber\DoctrineProxySubscriber;
+use JMS\Serializer\Exclusion\DepthExclusionStrategy;
 use JMS\Serializer\Exclusion\GroupsExclusionStrategy;
 use JMS\Serializer\Expression\ExpressionEvaluator;
 use JMS\Serializer\GraphNavigator;
-use JMS\Serializer\Handler\PhpCollectionHandler;
-use JMS\Serializer\Handler\StdClassHandler;
-use JMS\Serializer\Handler\SubscribingHandlerInterface;
-use JMS\Serializer\SerializationContext;
-use JMS\Serializer\SerializationVisitorInterface;
-use JMS\Serializer\Tests\Fixtures\AuthorExpressionAccess;
-use JMS\Serializer\Tests\Fixtures\DateTimeArraysObject;
-use JMS\Serializer\Tests\Fixtures\Discriminator\Car;
-use JMS\Serializer\Tests\Fixtures\Discriminator\Moped;
-use JMS\Serializer\Tests\Fixtures\Garage;
-use JMS\Serializer\Tests\Fixtures\GroupsUser;
-use JMS\Serializer\Tests\Fixtures\InlineChildEmpty;
-use JMS\Serializer\Tests\Fixtures\NamedDateTimeArraysObject;
-use JMS\Serializer\Tests\Fixtures\ObjectWithEmptyNullableAndEmptyArrays;
-use JMS\Serializer\Tests\Fixtures\NamedDateTimeImmutableArraysObject;
-use JMS\Serializer\Tests\Fixtures\ObjectWithIntArrayObjectListAndIntMap;
-use JMS\Serializer\Tests\Fixtures\ObjectWithIntListAndIntMap;
-use JMS\Serializer\Tests\Fixtures\PersonSecret;
-use JMS\Serializer\Tests\Fixtures\PersonSecretMore;
-use JMS\Serializer\Tests\Fixtures\PersonSecretMoreVirtual;
-use JMS\Serializer\Tests\Fixtures\PersonSecretVirtual;
-use JMS\Serializer\Tests\Fixtures\Tag;
-use JMS\Serializer\Tests\Fixtures\Timestamp;
-use JMS\Serializer\Tests\Fixtures\Tree;
-use JMS\Serializer\Tests\Fixtures\VehicleInterfaceGarage;
-use Symfony\Component\ExpressionLanguage\ExpressionFunction;
-use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
-use Symfony\Component\Form\FormFactoryBuilder;
-use Symfony\Component\Translation\MessageSelector;
-use Symfony\Component\Translation\IdentityTranslator;
-use JMS\Serializer\EventDispatcher\Subscriber\DoctrineProxySubscriber;
-use JMS\Serializer\Handler\HandlerRegistry;
-use JMS\Serializer\EventDispatcher\EventDispatcher;
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Collections\ArrayCollection;
-use JMS\Serializer\Metadata\Driver\AnnotationDriver;
-use JMS\Serializer\Construction\UnserializeObjectConstructor;
 use JMS\Serializer\Handler\ArrayCollectionHandler;
 use JMS\Serializer\Handler\ConstraintViolationHandler;
 use JMS\Serializer\Handler\DateHandler;
 use JMS\Serializer\Handler\FormErrorHandler;
+use JMS\Serializer\Handler\HandlerRegistry;
+use JMS\Serializer\Handler\PhpCollectionHandler;
+use JMS\Serializer\Handler\StdClassHandler;
+use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\JsonDeserializationVisitor;
 use JMS\Serializer\JsonSerializationVisitor;
+use JMS\Serializer\Metadata\Driver\AnnotationDriver;
 use JMS\Serializer\Naming\CamelCaseNamingStrategy;
 use JMS\Serializer\Naming\SerializedNameAnnotationStrategy;
+use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializationVisitorInterface;
 use JMS\Serializer\Serializer;
-use JMS\Serializer\XmlDeserializationVisitor;
-use JMS\Serializer\XmlSerializationVisitor;
-use JMS\Serializer\YamlSerializationVisitor;
 use JMS\Serializer\Tests\Fixtures\AccessorOrderChild;
-use JMS\Serializer\Tests\Fixtures\AccessorOrderParent;
 use JMS\Serializer\Tests\Fixtures\AccessorOrderMethod;
+use JMS\Serializer\Tests\Fixtures\AccessorOrderParent;
+use JMS\Serializer\Tests\Fixtures\Article;
 use JMS\Serializer\Tests\Fixtures\Author;
-use JMS\Serializer\Tests\Fixtures\Publisher;
+use JMS\Serializer\Tests\Fixtures\AuthorExpressionAccess;
 use JMS\Serializer\Tests\Fixtures\AuthorList;
 use JMS\Serializer\Tests\Fixtures\AuthorReadOnly;
+use JMS\Serializer\Tests\Fixtures\AuthorReadOnlyPerClass;
 use JMS\Serializer\Tests\Fixtures\BlogPost;
 use JMS\Serializer\Tests\Fixtures\CircularReferenceParent;
 use JMS\Serializer\Tests\Fixtures\Comment;
 use JMS\Serializer\Tests\Fixtures\CurrencyAwareOrder;
 use JMS\Serializer\Tests\Fixtures\CurrencyAwarePrice;
 use JMS\Serializer\Tests\Fixtures\CustomDeserializationObject;
+use JMS\Serializer\Tests\Fixtures\DateTimeArraysObject;
+use JMS\Serializer\Tests\Fixtures\Discriminator\Car;
+use JMS\Serializer\Tests\Fixtures\Discriminator\Moped;
+use JMS\Serializer\Tests\Fixtures\Garage;
 use JMS\Serializer\Tests\Fixtures\GetSetObject;
 use JMS\Serializer\Tests\Fixtures\GroupsObject;
-use JMS\Serializer\Tests\Fixtures\InvalidGroupsObject;
+use JMS\Serializer\Tests\Fixtures\GroupsUser;
 use JMS\Serializer\Tests\Fixtures\IndexedCommentsBlogPost;
-use JMS\Serializer\Tests\Fixtures\InlineParent;
-use JMS\Serializer\Tests\Fixtures\InitializedObjectConstructor;
 use JMS\Serializer\Tests\Fixtures\InitializedBlogPostConstructor;
+use JMS\Serializer\Tests\Fixtures\InitializedObjectConstructor;
+use JMS\Serializer\Tests\Fixtures\InlineChildEmpty;
+use JMS\Serializer\Tests\Fixtures\InlineParent;
+use JMS\Serializer\Tests\Fixtures\Input;
+use JMS\Serializer\Tests\Fixtures\InvalidGroupsObject;
 use JMS\Serializer\Tests\Fixtures\Log;
+use JMS\Serializer\Tests\Fixtures\NamedDateTimeArraysObject;
+use JMS\Serializer\Tests\Fixtures\NamedDateTimeImmutableArraysObject;
+use JMS\Serializer\Tests\Fixtures\Node;
+use JMS\Serializer\Tests\Fixtures\ObjectWithEmptyHash;
+use JMS\Serializer\Tests\Fixtures\ObjectWithEmptyNullableAndEmptyArrays;
+use JMS\Serializer\Tests\Fixtures\ObjectWithIntArrayObjectListAndIntMap;
+use JMS\Serializer\Tests\Fixtures\ObjectWithIntListAndIntMap;
 use JMS\Serializer\Tests\Fixtures\ObjectWithLifecycleCallbacks;
+use JMS\Serializer\Tests\Fixtures\ObjectWithNullProperty;
 use JMS\Serializer\Tests\Fixtures\ObjectWithVersionedVirtualProperties;
 use JMS\Serializer\Tests\Fixtures\ObjectWithVirtualProperties;
 use JMS\Serializer\Tests\Fixtures\Order;
+use JMS\Serializer\Tests\Fixtures\PersonSecret;
+use JMS\Serializer\Tests\Fixtures\PersonSecretMore;
+use JMS\Serializer\Tests\Fixtures\PersonSecretMoreVirtual;
+use JMS\Serializer\Tests\Fixtures\PersonSecretVirtual;
 use JMS\Serializer\Tests\Fixtures\Price;
+use JMS\Serializer\Tests\Fixtures\Publisher;
 use JMS\Serializer\Tests\Fixtures\SimpleObject;
-use JMS\Serializer\Tests\Fixtures\ObjectWithNullProperty;
 use JMS\Serializer\Tests\Fixtures\SimpleObjectProxy;
-use JMS\Serializer\Tests\Fixtures\Article;
-use JMS\Serializer\Tests\Fixtures\Input;
-use JMS\Serializer\Tests\Fixtures\ObjectWithEmptyHash;
+use JMS\Serializer\Tests\Fixtures\Tag;
+use JMS\Serializer\Tests\Fixtures\Timestamp;
+use JMS\Serializer\Tests\Fixtures\Tree;
+use JMS\Serializer\Tests\Fixtures\VehicleInterfaceGarage;
+use JMS\Serializer\XmlDeserializationVisitor;
+use JMS\Serializer\XmlSerializationVisitor;
+use JMS\Serializer\YamlSerializationVisitor;
 use Metadata\MetadataFactory;
+use PhpCollection\Map;
+use Symfony\Component\ExpressionLanguage\ExpressionFunction;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormFactoryBuilder;
+use Symfony\Component\Translation\IdentityTranslator;
+use Symfony\Component\Translation\MessageSelector;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
-use PhpCollection\Map;
-use JMS\Serializer\Exclusion\DepthExclusionStrategy;
-use JMS\Serializer\Tests\Fixtures\Node;
-use JMS\Serializer\Tests\Fixtures\AuthorReadOnlyPerClass;
 
 abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
 {
@@ -321,10 +321,10 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
      */
     public function testBooleans($strBoolean, $boolean)
     {
-        $this->assertEquals($this->getContent('boolean_'.$strBoolean), $this->serialize($boolean));
+        $this->assertEquals($this->getContent('boolean_' . $strBoolean), $this->serialize($boolean));
 
         if ($this->hasDeserializer()) {
-            $this->assertSame($boolean, $this->deserialize($this->getContent('boolean_'.$strBoolean), 'boolean'));
+            $this->assertSame($boolean, $this->deserialize($this->getContent('boolean_' . $strBoolean), 'boolean'));
         }
     }
 
@@ -487,7 +487,7 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
         );
 
         $object = new DateTimeArraysObject($data, $data);
-        $serializedObject = $this->serialize( $object );
+        $serializedObject = $this->serialize($object);
 
         $this->assertEquals($this->getContent('array_datetimes_object'), $serializedObject);
 
@@ -516,7 +516,7 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
         );
 
         $object = new NamedDateTimeArraysObject(array('testdate1' => $data[0], 'testdate2' => $data[1]));
-        $serializedObject = $this->serialize( $object );
+        $serializedObject = $this->serialize($object);
 
         $this->assertEquals($this->getContent('array_named_datetimes_object'), $serializedObject);
 
@@ -709,8 +709,8 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
 
         $this->serializationVisitors = new Map(array(
             'json' => new JsonSerializationVisitor($namingStrategy, $accessor),
-            'xml'  => new XmlSerializationVisitor($namingStrategy, $accessor),
-            'yml'  => new YamlSerializationVisitor($namingStrategy, $accessor),
+            'xml' => new XmlSerializationVisitor($namingStrategy, $accessor),
+            'yml' => new YamlSerializationVisitor($namingStrategy, $accessor),
         ));
 
         $serializer = new Serializer($this->factory, $this->handlerRegistry, $this->objectConstructor, $this->serializationVisitors, $this->deserializationVisitors, $this->dispatcher, null, $evaluator);
@@ -1109,11 +1109,11 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
 
     public function testCustomHandler()
     {
-        if ( ! $this->hasDeserializer()) {
+        if (!$this->hasDeserializer()) {
             return;
         }
 
-        $handler = function() {
+        $handler = function () {
             return new CustomDeserializationObject('customly_unserialized_value');
         };
 
@@ -1267,8 +1267,7 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
     public function testDepthExclusionStrategy()
     {
         $context = SerializationContext::create()
-            ->addExclusionStrategy(new DepthExclusionStrategy())
-        ;
+            ->addExclusionStrategy(new DepthExclusionStrategy());
 
         $data = new Tree(
             new Node(array(
@@ -1321,6 +1320,7 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
     }
 
     abstract protected function getContent($key);
+
     abstract protected function getFormat();
 
     protected function hasDeserializer()
@@ -1349,12 +1349,12 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
         $this->handlerRegistry->registerSubscribingHandler(new FormErrorHandler(new IdentityTranslator(new MessageSelector())));
         $this->handlerRegistry->registerSubscribingHandler(new ArrayCollectionHandler());
         $this->handlerRegistry->registerHandler(GraphNavigator::DIRECTION_SERIALIZATION, 'AuthorList', $this->getFormat(),
-            function(SerializationVisitorInterface $visitor, $object, array $type, Context $context) {
+            function (SerializationVisitorInterface $visitor, $object, array $type, Context $context) {
                 return $visitor->visitArray(iterator_to_array($object), $type, $context);
             }
         );
         $this->handlerRegistry->registerHandler(GraphNavigator::DIRECTION_DESERIALIZATION, 'AuthorList', $this->getFormat(),
-            function(DeserializationVisitorInterface $visitor, $data, $type, Context $context) {
+            function (DeserializationVisitorInterface $visitor, $data, $type, Context $context) {
                 $type = array(
                     'name' => 'array',
                     'params' => array(
@@ -1380,12 +1380,12 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
         $this->objectConstructor = new UnserializeObjectConstructor();
         $this->serializationVisitors = new Map(array(
             'json' => new JsonSerializationVisitor($namingStrategy),
-            'xml'  => new XmlSerializationVisitor($namingStrategy),
-            'yml'  => new YamlSerializationVisitor($namingStrategy),
+            'xml' => new XmlSerializationVisitor($namingStrategy),
+            'yml' => new YamlSerializationVisitor($namingStrategy),
         ));
         $this->deserializationVisitors = new Map(array(
             'json' => new JsonDeserializationVisitor($namingStrategy),
-            'xml'  => new XmlDeserializationVisitor($namingStrategy),
+            'xml' => new XmlDeserializationVisitor($namingStrategy),
         ));
 
         $this->serializer = new Serializer($this->factory, $this->handlerRegistry, $this->objectConstructor, $this->serializationVisitors, $this->deserializationVisitors, $this->dispatcher);

@@ -49,7 +49,7 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
             $this->root = $data;
         }
 
-        return (string) $data;
+        return (string)$data;
     }
 
     public function visitBoolean($data, array $type, Context $context)
@@ -58,7 +58,7 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
             $this->root = $data;
         }
 
-        return (boolean) $data;
+        return (boolean)$data;
     }
 
     public function visitInteger($data, array $type, Context $context)
@@ -67,7 +67,7 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
             $this->root = $data;
         }
 
-        return (int) $data;
+        return (int)$data;
     }
 
     public function visitDouble($data, array $type, Context $context)
@@ -76,7 +76,7 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
             $this->root = $data;
         }
 
-        return (float) $data;
+        return (float)$data;
     }
 
     /**
@@ -98,7 +98,7 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
             $rs = $isHash ? new ArrayObject() : array();
         }
 
-        $isList = isset($type['params'][0]) && ! isset($type['params'][1]);
+        $isList = isset($type['params'][0]) && !isset($type['params'][1]);
 
         foreach ($data as $k => $v) {
             $v = $this->navigator->accept($v, $this->getElementType($type), $context);
@@ -216,6 +216,6 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
 
     public function setOptions($options)
     {
-        $this->options = (integer) $options;
+        $this->options = (integer)$options;
     }
 }

@@ -19,14 +19,14 @@
 namespace JMS\Serializer\Tests\Serializer;
 
 use JMS\Serializer\Context;
-use JMS\Serializer\Exception\RuntimeException;
 use JMS\Serializer\EventDispatcher\Event;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
+use JMS\Serializer\Exception\RuntimeException;
 use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\SerializationVisitorInterface;
-use JMS\Serializer\Tests\Fixtures\Tag;
 use JMS\Serializer\Tests\Fixtures\Author;
 use JMS\Serializer\Tests\Fixtures\AuthorList;
+use JMS\Serializer\Tests\Fixtures\Tag;
 
 class JsonSerializationTest extends BaseSerializationTest
 {
@@ -132,7 +132,7 @@ class JsonSerializationTest extends BaseSerializationTest
         }, 'JMS\Serializer\Tests\Fixtures\Author', 'json');
 
         $this->handlerRegistry->registerHandler(GraphNavigator::DIRECTION_SERIALIZATION, 'JMS\Serializer\Tests\Fixtures\AuthorList', 'json',
-            function(SerializationVisitorInterface $visitor, AuthorList $data, array $type, Context $context) {
+            function (SerializationVisitorInterface $visitor, AuthorList $data, array $type, Context $context) {
                 return $visitor->visitArray(iterator_to_array($data), $type, $context);
             }
         );
@@ -148,7 +148,7 @@ class JsonSerializationTest extends BaseSerializationTest
     {
         $this->dispatcher->addSubscriber(new ReplaceNameSubscriber());
         $this->handlerRegistry->registerHandler(GraphNavigator::DIRECTION_SERIALIZATION, 'JMS\Serializer\Tests\Fixtures\AuthorList', 'json',
-            function(SerializationVisitorInterface $visitor, AuthorList $data, array $type, Context $context) {
+            function (SerializationVisitorInterface $visitor, AuthorList $data, array $type, Context $context) {
                 return $visitor->visitArray(iterator_to_array($data), $type, $context);
             }
         );
@@ -249,7 +249,7 @@ class JsonSerializationTest extends BaseSerializationTest
     public function testSerializeWithNonUtf8EncodingWhenDisplayErrorsOff()
     {
         ini_set('display_errors', 1);
-        $this->serialize(array('foo' => 'bar', 'bar' => pack("H*" ,'c32e')));
+        $this->serialize(array('foo' => 'bar', 'bar' => pack("H*", 'c32e')));
     }
 
     /**
@@ -260,7 +260,7 @@ class JsonSerializationTest extends BaseSerializationTest
     public function testSerializeWithNonUtf8EncodingWhenDisplayErrorsOn()
     {
         ini_set('display_errors', 0);
-        $this->serialize(array('foo' => 'bar', 'bar' => pack("H*" ,'c32e')));
+        $this->serialize(array('foo' => 'bar', 'bar' => pack("H*", 'c32e')));
     }
 
     public function testSerializeArrayWithEmptyObject()
@@ -325,7 +325,7 @@ class JsonSerializationTest extends BaseSerializationTest
 
         $this->assertEquals('{"jim":{"full_name":"Jim"},"mark":{"full_name":"Mark"}}', $this->serializer->serialize($data, $this->getFormat(), null, 'array'));
         $this->assertEquals('[{"full_name":"Jim"},{"full_name":"Mark"}]', $this->serializer->serialize($data, $this->getFormat(), null, 'array<JMS\Serializer\Tests\Fixtures\Author>'));
-        $this->assertEquals('{"jim":{"full_name":"Jim"},"mark":{"full_name":"Mark"}}', $this->serializer->serialize($data, $this->getFormat(), null,'array<string,JMS\Serializer\Tests\Fixtures\Author>'));
+        $this->assertEquals('{"jim":{"full_name":"Jim"},"mark":{"full_name":"Mark"}}', $this->serializer->serialize($data, $this->getFormat(), null, 'array<string,JMS\Serializer\Tests\Fixtures\Author>'));
 
         $data = array(
             $author1,
@@ -343,7 +343,7 @@ class JsonSerializationTest extends BaseSerializationTest
             [[1, 2], '[1,2]', null],
             [['a', 'b'], '["a","b"]', null],
             [['a' => 'a', 'b' => 'b'], '{"a":"a","b":"b"}', null],
-            
+
             [[], '[]', null],
             [[], '[]', 'array'],
             [[], '[]', 'array<integer>'],
@@ -359,9 +359,9 @@ class JsonSerializationTest extends BaseSerializationTest
             [['a' => 'a', 'b' => 'b'], '["a","b"]', 'array<string>'],
 
 
-            [[1,2], '{"0":1,"1":2}', 'array<integer,integer>'],
-            [[1,2], '{"0":1,"1":2}', 'array<string,integer>'],
-            [[1,2], '{"0":"1","1":"2"}', 'array<string,string>'],
+            [[1, 2], '{"0":1,"1":2}', 'array<integer,integer>'],
+            [[1, 2], '{"0":1,"1":2}', 'array<string,integer>'],
+            [[1, 2], '{"0":"1","1":"2"}', 'array<string,string>'],
 
 
             [['a', 'b'], '{"0":"a","1":"b"}', 'array<integer,string>'],
@@ -382,8 +382,8 @@ class LinkAddingSubscriber implements EventSubscriberInterface
         $author = $event->getObject();
 
         $event->getVisitor()->setData('_links', array(
-            'details' => 'http://foo.bar/details/'.$author->getName(),
-            'comments' => 'http://foo.bar/details/'.$author->getName().'/comments',
+            'details' => 'http://foo.bar/details/' . $author->getName(),
+            'comments' => 'http://foo.bar/details/' . $author->getName() . '/comments',
         ));
     }
 

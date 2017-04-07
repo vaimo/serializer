@@ -19,8 +19,8 @@
 namespace JMS\Serializer;
 
 use JMS\Serializer\Exception\RuntimeException;
-use JMS\Serializer\Metadata\PropertyMetadata;
 use JMS\Serializer\Metadata\ClassMetadata;
+use JMS\Serializer\Metadata\PropertyMetadata;
 
 /**
  * JSON Deserialization Visitor.
@@ -46,32 +46,32 @@ class JsonDeserializationVisitor extends AbstractVisitor implements Deserializat
 
     public function visitString($data, array $type, Context $context)
     {
-        return (string) $data;
+        return (string)$data;
     }
 
     public function visitBoolean($data, array $type, Context $context)
     {
-        return (Boolean) $data;
+        return (Boolean)$data;
     }
 
     public function visitInteger($data, array $type, Context $context)
     {
-        return (integer) $data;;
+        return (integer)$data;;
     }
 
     public function visitDouble($data, array $type, Context $context)
     {
-        return (double) $data;
+        return (double)$data;
     }
 
     public function visitArray($data, array $type, Context $context)
     {
-        if ( ! is_array($data)) {
+        if (!is_array($data)) {
             throw new RuntimeException(sprintf('Expected array, but got %s: %s', gettype($data), json_encode($data)));
         }
 
         // If no further parameters were given, keys/values are just passed as is.
-        if ( ! $type['params']) {
+        if (!$type['params']) {
             return $data;
         }
 
@@ -116,15 +116,15 @@ class JsonDeserializationVisitor extends AbstractVisitor implements Deserializat
             return;
         }
 
-        if ( ! is_array($data)) {
+        if (!is_array($data)) {
             throw new RuntimeException(sprintf('Invalid data "%s"(%s), expected "%s".', $data, $metadata->type['name'], $metadata->reflection->class));
         }
 
-        if ( ! array_key_exists($name, $data)) {
+        if (!array_key_exists($name, $data)) {
             return;
         }
 
-        if ( ! $metadata->type) {
+        if (!$metadata->type) {
             throw new RuntimeException(sprintf('You must define a type for %s::$%s.', $metadata->reflection->class, $metadata->name));
         }
 

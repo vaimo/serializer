@@ -18,7 +18,6 @@
 
 namespace JMS\Serializer\Tests\Metadata\Driver;
 
-use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\Metadata\PropertyMetadata;
 use JMS\Serializer\Metadata\VirtualPropertyMetadata;
@@ -46,13 +45,13 @@ abstract class BaseDriverTest extends \PHPUnit\Framework\TestCase
 
         $p = new PropertyMetadata($m->name, 'id');
         $p->type = array('name' => 'string', 'params' => array());
-        $p->groups = array("comments","post");
+        $p->groups = array("comments", "post");
         $p->xmlElementCData = false;
         $this->assertEquals($p, $m->propertyMetadata['id']);
 
         $p = new PropertyMetadata($m->name, 'title');
         $p->type = array('name' => 'string', 'params' => array());
-        $p->groups = array("comments","post");
+        $p->groups = array("comments", "post");
         $p->xmlNamespace = "http://purl.org/dc/elements/1.1/";
         $this->assertEquals($p, $m->propertyMetadata['title']);
 
@@ -120,7 +119,7 @@ abstract class BaseDriverTest extends \PHPUnit\Framework\TestCase
         $this->assertArrayHasKey('virtualSerializedValue', $m->propertyMetadata);
         $this->assertArrayHasKey('typedVirtualProperty', $m->propertyMetadata);
 
-        $this->assertEquals($m->propertyMetadata['virtualSerializedValue']->serializedName, 'test', 'Serialized name is missing' );
+        $this->assertEquals($m->propertyMetadata['virtualSerializedValue']->serializedName, 'test', 'Serialized name is missing');
 
         $p = new VirtualPropertyMetadata($m->name, 'virtualValue');
         $p->getter = 'getVirtualValue';
@@ -394,7 +393,7 @@ abstract class BaseDriverTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($expectedVars, $actualVars);
 
         // HHVM bug with class property
-        if (isset($expectedReflection['info']) || isset($actualReflection['info'])){
+        if (isset($expectedReflection['info']) || isset($actualReflection['info'])) {
             $expectedReflection['class'] = $expectedReflection['info']['class'];
             $actualReflection['class'] = $actualReflection['info']['class'];
         }
