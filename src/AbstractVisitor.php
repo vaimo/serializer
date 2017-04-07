@@ -24,6 +24,9 @@ use JMS\Serializer\Naming\PropertyNamingStrategyInterface;
 
 abstract class AbstractVisitor implements VisitorInterface
 {
+    /**
+     * @var PropertyNamingStrategyInterface
+     */
     protected $namingStrategy;
 
     /**
@@ -35,11 +38,6 @@ abstract class AbstractVisitor implements VisitorInterface
     {
         $this->namingStrategy = $namingStrategy;
         $this->accessor = $accessorStrategy ?: new DefaultAccessorStrategy();
-    }
-
-    public function getNamingStrategy()
-    {
-        return $this->namingStrategy;
     }
 
     public function prepare($data)
