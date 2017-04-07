@@ -19,10 +19,151 @@
 namespace JMS\Serializer;
 
 use JMS\Serializer\Exception\RuntimeException;
+use JMS\Serializer\Metadata\PropertyMetadata;
+use JMS\Serializer\Metadata\ClassMetadata;
 
-class JsonDeserializationVisitor extends GenericDeserializationVisitor
+/**
+ * JSON Deserialization Visitor.
+ *
+ * @author Johannes M. Schmitt <schmittjoh@gmail.com>
+ */
+class JsonDeserializationVisitor extends AbstractVisitor
 {
-    protected function decode($str)
+    private $navigator;
+    private $objectStack;
+    private $currentObject;
+
+    public function setNavigator(GraphNavigatorInterface $navigator)
+    {
+        $this->navigator = $navigator;
+        $this->objectStack = new \SplStack;
+    }
+
+    public function visitNull($data, array $type, Context $context)
+    {
+        return null;
+    }
+
+    public function visitString($data, array $type, Context $context)
+    {
+        return (string) $data;
+    }
+
+    public function visitBoolean($data, array $type, Context $context)
+    {
+        return (Boolean) $data;
+    }
+
+    public function visitInteger($data, array $type, Context $context)
+    {
+        return (integer) $data;;
+    }
+
+    public function visitDouble($data, array $type, Context $context)
+    {
+        return (double) $data;
+    }
+
+    public function visitArray($data, array $type, Context $context)
+    {
+        if ( ! is_array($data)) {
+            throw new RuntimeException(sprintf('Expected array, but got %s: %s', gettype($data), json_encode($data)));
+        }
+
+        // If no further parameters were given, keys/values are just passed as is.
+        if ( ! $type['params']) {
+            return $data;
+        }
+
+        switch (count($type['params'])) {
+            case 1: // Array is a list.
+                $listType = $type['params'][0];
+
+                $result = array();
+
+                foreach ($data as $v) {
+                    $result[] = $this->navigator->accept($v, $listType, $context);
+                }
+
+                return $result;
+
+            case 2: // Array is a map.
+                list($keyType, $entryType) = $type['params'];
+
+                $result = array();
+
+                foreach ($data as $k => $v) {
+                    $result[$this->navigator->accept($k, $keyType, $context)] = $this->navigator->accept($v, $entryType, $context);
+                }
+
+                return $result;
+
+            default:
+                throw new RuntimeException(sprintf('Array type cannot have more than 2 parameters, but got %s.', json_encode($type['params'])));
+        }
+    }
+
+    public function startVisitingObject(ClassMetadata $metadata, $object, array $type, Context $context)
+    {
+        $this->setCurrentObject($object);
+    }
+
+    public function visitProperty(PropertyMetadata $metadata, $data, Context $context)
+    {
+        $name = $this->namingStrategy->translateName($metadata);
+
+        if (null === $data) {
+            return;
+        }
+
+        if ( ! is_array($data)) {
+            throw new RuntimeException(sprintf('Invalid data "%s"(%s), expected "%s".', $data, $metadata->type['name'], $metadata->reflection->class));
+        }
+
+        if ( ! array_key_exists($name, $data)) {
+            return;
+        }
+
+        if ( ! $metadata->type) {
+            throw new RuntimeException(sprintf('You must define a type for %s::$%s.', $metadata->reflection->class, $metadata->name));
+        }
+
+        $v = $data[$name] !== null ? $this->navigator->accept($data[$name], $metadata->type, $context) : null;
+
+        $this->accessor->setValue($this->currentObject, $v, $metadata);
+
+    }
+
+    public function endVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context)
+    {
+        $obj = $this->currentObject;
+        $this->revertCurrentObject();
+
+        return $obj;
+    }
+
+    public function getResult()
+    {
+        throw new \Exception(__METHOD__ . " has been deprecated for deserialization visitors");
+    }
+
+    public function setCurrentObject($object)
+    {
+        $this->objectStack->push($this->currentObject);
+        $this->currentObject = $object;
+    }
+
+    public function getCurrentObject()
+    {
+        return $this->currentObject;
+    }
+
+    public function revertCurrentObject()
+    {
+        return $this->currentObject = $this->objectStack->pop();
+    }
+
+    public function prepare($str)
     {
         $decoded = json_decode($str, true);
 

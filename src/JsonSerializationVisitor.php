@@ -19,8 +19,8 @@
 namespace JMS\Serializer;
 
 use JMS\Serializer\Metadata\ClassMetadata;
-use JMS\Serializer\Exception\InvalidArgumentException;
 use JMS\Serializer\Metadata\PropertyMetadata;
+use JMS\Serializer\Util\ArrayObject;
 
 class JsonSerializationVisitor extends AbstractVisitor
 {
@@ -92,10 +92,10 @@ class JsonSerializationVisitor extends AbstractVisitor
         $isHash = isset($type['params'][1]);
 
         if (null === $this->root) {
-            $this->root = $isHash ? new \ArrayObject() : array();
+            $this->root = $isHash ? new ArrayObject() : array();
             $rs = &$this->root;
         } else {
-            $rs = $isHash ? new \ArrayObject() : array();
+            $rs = $isHash ? new ArrayObject() : array();
         }
 
         $isList = isset($type['params'][0]) && ! isset($type['params'][1]);
@@ -115,17 +115,14 @@ class JsonSerializationVisitor extends AbstractVisitor
         }
 
         $this->dataStack->pop();
+
         return $rs;
     }
 
     public function startVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context)
     {
-        if (null === $this->root) {
-            $this->root = new \stdClass;
-        }
-
         $this->dataStack->push($this->data);
-        $this->data = array();
+        $this->data = new ArrayObject();
     }
 
     public function endVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context)
@@ -133,12 +130,7 @@ class JsonSerializationVisitor extends AbstractVisitor
         $rs = $this->data;
         $this->data = $this->dataStack->pop();
 
-        if (empty($rs)) {
-            // Force JSON output to "{}" instead of "[]" for empty objects
-            $rs = new \stdClass();
-        }
-
-        if ($this->root instanceof \stdClass && 0 === $this->dataStack->count()) {
+        if (0 === $this->dataStack->count()) {
             $this->root = $rs;
         }
 
@@ -156,13 +148,13 @@ class JsonSerializationVisitor extends AbstractVisitor
 
         $k = $this->namingStrategy->translateName($metadata);
 
-        if ($metadata->inline) {
-            if (is_array($v)) {
-                $this->data = array_merge($this->data, $v);
-            }
-        } else {
-            $this->data[$k] = $v;
+        if ($metadata->inline && ($v instanceof ArrayObject)) {
+            $this->data->merge($v);
+
+            return;
         }
+
+        $this->data[$k] = $v;
     }
 
     /**
@@ -200,7 +192,6 @@ class JsonSerializationVisitor extends AbstractVisitor
     {
         $this->root = $data;
     }
-
 
     public function getResult()
     {

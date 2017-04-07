@@ -27,6 +27,7 @@ use JMS\Serializer\ContextFactory\SerializationContextFactoryInterface;
 use JMS\Serializer\ContextFactory\DeserializationContextFactoryInterface;
 use JMS\Serializer\ContextFactory\DefaultSerializationContextFactory;
 use JMS\Serializer\ContextFactory\DefaultDeserializationContextFactory;
+use JMS\Serializer\Util\ArrayObject;
 use Metadata\MetadataFactoryInterface;
 use PhpCollection\MapInterface;
 use JMS\Serializer\Expression\ExpressionEvaluatorInterface;
@@ -127,9 +128,7 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
         return $this->deserializationVisitors->get($format)
             ->map(function(VisitorInterface $visitor) use ($context, $data, $format, $type) {
                 $preparedData = $visitor->prepare($data);
-                $navigatorResult = $this->visit($visitor, $context, $preparedData, $format, $this->typeParser->parse($type));
-
-                return $this->handleDeserializeResult($visitor->getResult(), $navigatorResult);
+                return $this->visit($visitor, $context, $preparedData, $format, $this->typeParser->parse($type));
             })
             ->getOrThrow(new UnsupportedFormatException(sprintf('The format "%s" is not supported for deserialization.', $format)))
         ;
@@ -150,7 +149,7 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
                 $type = $type !== null ? $this->typeParser->parse($type) : null;
 
                 $this->visit($visitor, $context, $data, 'json', $type);
-                $result = $this->convertStdClasses($visitor->getRoot());
+                $result = $this->removeInternalArrayObjects($visitor->getRoot());
 
                 if ( ! is_array($result)) {
                     throw new RuntimeException(sprintf(
@@ -177,9 +176,7 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
 
         return $this->deserializationVisitors->get('json')
             ->map(function(JsonDeserializationVisitor $visitor) use ($data, $type, $context) {
-                $navigatorResult = $this->visit($visitor, $context, $data, 'json', $this->typeParser->parse($type));
-
-                return $this->handleDeserializeResult($visitor->getResult(), $navigatorResult);
+                return $this->visit($visitor, $context, $data, 'json', $this->typeParser->parse($type));
             })
             ->get()
         ;
@@ -199,25 +196,15 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
         return $this->navigator->accept($data, $type, $context);
     }
 
-    private function handleDeserializeResult($visitorResult, $navigatorResult)
+    private function removeInternalArrayObjects($data)
     {
-        // This is a special case if the root is handled by a callback on the object itself.
-        if (null === $visitorResult && null !== $navigatorResult) {
-            return $navigatorResult;
-        }
-
-        return $visitorResult;
-    }
-
-    private function convertStdClasses($data)
-    {
-        if ($data instanceof \stdClass) {
-            return array();
+        if ($data instanceof ArrayObject) {
+            $data = $data->getArrayCopy();
         }
 
         if (is_array($data)) {
             foreach ($data as $k => $v) {
-                $data[$k] = $this->convertStdClasses($v);
+                $data[$k] = $this->removeInternalArrayObjects($v);
             }
         }
 

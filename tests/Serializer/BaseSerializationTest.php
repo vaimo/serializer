@@ -27,6 +27,7 @@ use JMS\Serializer\Expression\ExpressionEvaluator;
 use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\Handler\PhpCollectionHandler;
 use JMS\Serializer\Handler\StdClassHandler;
+use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\Tests\Fixtures\AuthorExpressionAccess;
 use JMS\Serializer\Tests\Fixtures\DateTimeArraysObject;
@@ -38,6 +39,7 @@ use JMS\Serializer\Tests\Fixtures\InlineChildEmpty;
 use JMS\Serializer\Tests\Fixtures\NamedDateTimeArraysObject;
 use JMS\Serializer\Tests\Fixtures\ObjectWithEmptyNullableAndEmptyArrays;
 use JMS\Serializer\Tests\Fixtures\NamedDateTimeImmutableArraysObject;
+use JMS\Serializer\Tests\Fixtures\ObjectWithIntArrayObjectListAndIntMap;
 use JMS\Serializer\Tests\Fixtures\ObjectWithIntListAndIntMap;
 use JMS\Serializer\Tests\Fixtures\PersonSecret;
 use JMS\Serializer\Tests\Fixtures\PersonSecretMore;
@@ -47,7 +49,6 @@ use JMS\Serializer\Tests\Fixtures\Tag;
 use JMS\Serializer\Tests\Fixtures\Timestamp;
 use JMS\Serializer\Tests\Fixtures\Tree;
 use JMS\Serializer\Tests\Fixtures\VehicleInterfaceGarage;
-use PhpCollection\Sequence;
 use Symfony\Component\ExpressionLanguage\ExpressionFunction;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Form\FormFactoryBuilder;
@@ -108,7 +109,6 @@ use JMS\Serializer\Tests\Fixtures\ObjectWithEmptyHash;
 use Metadata\MetadataFactory;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormError;
-use Symfony\Component\Validator\Constraints\Time;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
 use PhpCollection\Map;
@@ -405,6 +405,48 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
 
         if ($this->hasDeserializer()) {
             $this->assertEquals($data, $this->deserialize($this->getContent('array_empty'), 'array'));
+        }
+    }
+
+    public function testDeserializeToArrayObjectsWhenRoot()
+    {
+        if ($this->hasDeserializer()) {
+            $this->handlerRegistry->registerSubscribingHandler(new ArrayObjectHandler());
+
+            $result = $this->deserialize($this->getContent('array_strings'), 'ArrayObject<string>');
+
+            $this->assertInstanceOf(\ArrayObject::class, $result);
+            $this->assertCount(2, $result);
+            $this->assertSame("foo", $result[0]);
+            $this->assertSame("bar", $result[1]);
+
+        } else {
+            $this->markTestSkipped(sprintf("The format %s do not support deserialization", $this->getFormat()));
+        }
+    }
+
+    public function testDeserializeToArrayObjects()
+    {
+        if ($this->hasDeserializer()) {
+            $this->handlerRegistry->registerSubscribingHandler(new ArrayObjectHandler());
+
+            $result = $this->deserialize($this->getContent('array_list_and_map_difference'), ObjectWithIntArrayObjectListAndIntMap::class);
+
+            $this->assertInstanceOf(ObjectWithIntArrayObjectListAndIntMap::class, $result);
+
+            $this->assertInstanceOf(\ArrayObject::class, $result->list);
+            $this->assertCount(3, $result->list);
+            $this->assertSame(1, $result->list[0]);
+            $this->assertSame(2, $result->list[1]);
+            $this->assertSame(3, $result->list[2]);
+
+            $this->assertInstanceOf(\ArrayObject::class, $result->map);
+            $this->assertCount(3, $result->map);
+            $this->assertEquals(1, $result->map[0]);
+            $this->assertEquals(2, $result->map[2]);
+            $this->assertEquals(3, $result->map[3]);
+        } else {
+            $this->markTestSkipped(sprintf("The format %s do not support deserialization", $this->getFormat()));
         }
     }
 
@@ -1378,5 +1420,28 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
         $ref = new \ReflectionProperty($obj, $name);
         $ref->setAccessible(true);
         $ref->setValue($obj, $value);
+    }
+}
+
+class ArrayObjectHandler implements SubscribingHandlerInterface
+{
+    public static function getSubscribingMethods()
+    {
+        $methods = array();
+        foreach (array('json', 'xml', 'yml') as $format) {
+            $methods[] = array(
+                'direction' => GraphNavigator::DIRECTION_DESERIALIZATION,
+                'type' => \ArrayObject::class,
+                'format' => $format,
+                'method' => 'deserializeArrayObject'
+            );
+        }
+
+        return $methods;
+    }
+
+    public function deserializeArrayObject(VisitorInterface $visitor, $data, array $type, Context $context)
+    {
+        return new \ArrayObject($visitor->visitArray($data, $type, $context));
     }
 }
