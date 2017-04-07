@@ -19,6 +19,7 @@
 namespace JMS\Serializer;
 
 use JMS\Serializer\Construction\ObjectConstructorInterface;
+use JMS\Serializer\EventDispatcher\EventDispatcher;
 use JMS\Serializer\Exception\RuntimeException;
 use JMS\Serializer\Handler\HandlerRegistryInterface;
 use JMS\Serializer\EventDispatcher\EventDispatcherInterface;
@@ -51,7 +52,8 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
     /** @var \PhpCollection\MapInterface */
     private $deserializationVisitors;
 
-    private $navigator;
+    private $serializationNavigator;
+    private $deserializationNavigator;
 
     /**
      * @var SerializationContextFactoryInterface
@@ -89,12 +91,13 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
         $this->factory = $factory;
         $this->handlerRegistry = $handlerRegistry;
         $this->objectConstructor = $objectConstructor;
-        $this->dispatcher = $dispatcher;
+        $this->dispatcher = $dispatcher ?: new EventDispatcher();
         $this->typeParser = $typeParser ?: new TypeParser();
         $this->serializationVisitors = $serializationVisitors;
         $this->deserializationVisitors = $deserializationVisitors;
 
-        $this->navigator = new GraphNavigator($this->factory, $this->handlerRegistry, $this->objectConstructor, $this->dispatcher, $expressionEvaluator);
+        $this->serializationNavigator = new SerializationGraphNavigator($this->factory, $this->handlerRegistry, $this->dispatcher, $expressionEvaluator);
+        $this->deserializationNavigator = new DeserializationGraphNavigator($this->factory, $this->handlerRegistry, $this->dispatcher, $objectConstructor);
 
         $this->serializationContextFactory = new DefaultSerializationContextFactory();
         $this->deserializationContextFactory = new DefaultDeserializationContextFactory();
@@ -111,7 +114,7 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
 
                 $type = $type !== null ? $this->typeParser->parse($type) : null;
 
-                $this->visit($visitor, $context, $visitor->prepare($data), $format, $type);
+                $this->visit($this->serializationNavigator, $visitor, $context, $visitor->prepare($data), $format, $type);
 
                 return $visitor->getResult();
             })
@@ -128,7 +131,7 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
         return $this->deserializationVisitors->get($format)
             ->map(function(DeserializationVisitorInterface $visitor) use ($context, $data, $format, $type) {
                 $preparedData = $visitor->prepare($data);
-                return $this->visit($visitor, $context, $preparedData, $format, $this->typeParser->parse($type));
+                return $this->visit($this->deserializationNavigator, $visitor, $context, $preparedData, $format, $this->typeParser->parse($type));
             })
             ->getOrThrow(new UnsupportedFormatException(sprintf('The format "%s" is not supported for deserialization.', $format)))
         ;
@@ -148,7 +151,7 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
 
                 $type = $type !== null ? $this->typeParser->parse($type) : null;
 
-                $this->visit($visitor, $context, $data, 'json', $type);
+                $this->visit($this->serializationNavigator, $visitor, $context, $data, 'json', $type);
                 $result = $this->removeInternalArrayObjects($visitor->getRoot());
 
                 if ( ! is_array($result)) {
@@ -176,24 +179,24 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
 
         return $this->deserializationVisitors->get('json')
             ->map(function(JsonDeserializationVisitor $visitor) use ($data, $type, $context) {
-                return $this->visit($visitor, $context, $data, 'json', $this->typeParser->parse($type));
+                return $this->visit($this->deserializationNavigator, $visitor, $context, $data, 'json', $this->typeParser->parse($type));
             })
             ->get()
         ;
     }
 
-    private function visit($visitor, Context $context, $data, $format, array $type = null)
+    private function visit(GraphNavigatorInterface $navigator, $visitor, Context $context, $data, $format, array $type = null)
     {
         $context->initialize(
             $format,
             $visitor,
-            $this->navigator,
+            $navigator,
             $this->factory
         );
 
-        $visitor->setNavigator($this->navigator);
+        $visitor->setNavigator($navigator);
 
-        return $this->navigator->accept($data, $type, $context);
+        return $navigator->accept($data, $type, $context);
     }
 
     private function removeInternalArrayObjects($data)
