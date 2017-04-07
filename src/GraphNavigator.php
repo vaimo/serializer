@@ -42,9 +42,6 @@ use JMS\Serializer\Expression\ExpressionEvaluatorInterface;
  */
 final class GraphNavigator implements GraphNavigatorInterface
 {
-    const DIRECTION_SERIALIZATION = 1;
-    const DIRECTION_DESERIALIZATION = 2;
-
     /**
      * @var ExpressionLanguageExclusionStrategy
      */
