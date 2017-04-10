@@ -32,10 +32,11 @@ interface ArrayTransformerInterface
      *
      * @param mixed $data anything that converts to an array, typically an object or an array of objects
      * @param SerializationContext|null $context
+     * @param null $type
      *
      * @return array
      */
-    public function toArray($data, SerializationContext $context = null);
+    public function toArray($data, SerializationContext $context = null, $type = null);
 
     /**
      * Restores objects from an array structure.
