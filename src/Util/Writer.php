@@ -27,7 +27,7 @@ use JMS\Serializer\Exception\RuntimeException;
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-class Writer
+final class Writer
 {
     public $indentationSpaces = 4;
     public $indentationLevel = 0;

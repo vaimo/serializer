@@ -26,7 +26,7 @@ use JMS\Serializer\Metadata\PropertyMetadata;
  * This class decorates any other driver. If the inner driver does not provide a
  * a property type, the decorator will guess based on Doctrine 2 metadata.
  */
-class DoctrineTypeDriver extends AbstractDoctrineTypeDriver
+final class DoctrineTypeDriver extends AbstractDoctrineTypeDriver
 {
     protected function setDiscriminator(DoctrineClassMetadata $doctrineMetadata, ClassMetadata $classMetadata)
     {

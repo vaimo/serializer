@@ -28,7 +28,7 @@ use JMS\Serializer\Metadata\VirtualPropertyMetadata;
 use Metadata\Driver\AbstractFileDriver;
 use Metadata\MethodMetadata;
 
-class XmlDriver extends AbstractFileDriver
+final class XmlDriver extends AbstractFileDriver
 {
     protected function loadMetadataFromFile(\ReflectionClass $class, $path)
     {

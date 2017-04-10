@@ -26,7 +26,7 @@ use JMS\Serializer\SerializerInterface;
  *
  * Basically provides access to JMSSerializer from Twig
  */
-class SerializerExtension extends \Twig_Extension
+final class SerializerExtension extends \Twig_Extension
 {
     protected $serializer;
 

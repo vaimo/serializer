@@ -57,7 +57,7 @@ use JMS\Serializer\Metadata\VirtualPropertyMetadata;
 use Metadata\Driver\DriverInterface;
 use Metadata\MethodMetadata;
 
-class AnnotationDriver implements DriverInterface
+final class AnnotationDriver implements DriverInterface
 {
     private $reader;
 

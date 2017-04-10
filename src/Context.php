@@ -63,7 +63,6 @@ abstract class Context
         $this->attributes = new Map();
     }
 
-
     /**
      * @param string $format
      * @param SerializationVisitorInterface|DeserializationVisitorInterface $visitor
@@ -146,7 +145,8 @@ abstract class Context
     }
 
     /**
-     * @param integer $version
+     * @param string $version
+     * @return $this
      */
     public function setVersion($version)
     {
@@ -162,6 +162,7 @@ abstract class Context
 
     /**
      * @param array|string $groups
+     * @return $this
      */
     public function setGroups($groups)
     {
@@ -196,12 +197,10 @@ abstract class Context
     }
 
     /**
-     * Returns TRUE when NULLs should be serialized
-     * Returns FALSE when NULLs should not be serialized
-     * Returns NULL when NULLs should not be serialized,
-     * but the user has not explicitly decided to use this policy
+     * Returns
+     * Returns  when NULLs should not be serialized
      *
-     * @return bool|null
+     * @return bool TRUE when NULLs should be serialized, FALSE otherwise
      */
     public function shouldSerializeNull()
     {

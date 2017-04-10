@@ -28,7 +28,7 @@ use Metadata\Driver\AbstractFileDriver;
 use Metadata\MethodMetadata;
 use Symfony\Component\Yaml\Yaml;
 
-class YamlDriver extends AbstractFileDriver
+final class YamlDriver extends AbstractFileDriver
 {
     protected function loadMetadataFromFile(\ReflectionClass $class, $file)
     {

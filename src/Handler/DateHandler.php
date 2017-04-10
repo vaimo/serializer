@@ -26,7 +26,7 @@ use JMS\Serializer\SerializationVisitorInterface;
 use JMS\Serializer\XmlDeserializationVisitor;
 use JMS\Serializer\XmlSerializationVisitor;
 
-class DateHandler implements SubscribingHandlerInterface
+final class DateHandler implements SubscribingHandlerInterface
 {
     private $defaultFormat;
     private $defaultTimezone;

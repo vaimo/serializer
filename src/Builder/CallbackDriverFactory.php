@@ -5,7 +5,7 @@ namespace JMS\Serializer\Builder;
 use Doctrine\Common\Annotations\Reader;
 use Metadata\Driver\DriverInterface;
 
-class CallbackDriverFactory implements DriverFactoryInterface
+final class CallbackDriverFactory implements DriverFactoryInterface
 {
     private $callback;
 

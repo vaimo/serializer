@@ -26,7 +26,7 @@ use JMS\Serializer\VisitorInterface;
 /**
  * Doctrine object constructor for new (or existing) objects during deserialization.
  */
-class DoctrineObjectConstructor implements ObjectConstructorInterface
+final class DoctrineObjectConstructor implements ObjectConstructorInterface
 {
     private $managerRegistry;
     private $fallbackConstructor;
