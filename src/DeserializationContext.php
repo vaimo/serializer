@@ -18,6 +18,7 @@
 
 namespace JMS\Serializer;
 
+use JMS\Serializer\Exception\LogicException;
 use Metadata\MetadataFactoryInterface;
 
 class DeserializationContext extends Context
@@ -59,7 +60,7 @@ class DeserializationContext extends Context
     public function decreaseDepth()
     {
         if ($this->depth <= 0) {
-            throw new \LogicException('Depth cannot be smaller than zero.');
+            throw new LogicException('Depth cannot be smaller than zero.');
         }
 
         $this->depth -= 1;

@@ -296,7 +296,7 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
 
     public function getResult()
     {
-        throw new \Exception(__METHOD__ . " has been deprecated for deserialization visitors");
+        throw new RuntimeException(__METHOD__ . " has been deprecated for deserialization visitors");
     }
 
     /**

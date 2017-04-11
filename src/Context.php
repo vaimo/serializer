@@ -18,6 +18,7 @@
 
 namespace JMS\Serializer;
 
+use JMS\Serializer\Exception\LogicException;
 use JMS\Serializer\Exception\RuntimeException;
 use JMS\Serializer\Exclusion\DepthExclusionStrategy;
 use JMS\Serializer\Exclusion\DisjunctExclusionStrategy;
@@ -72,7 +73,7 @@ abstract class Context
     protected function initializeBasicContext($format, $visitor, GraphNavigatorInterface $navigator, MetadataFactoryInterface $factory)
     {
         if ($this->initialized) {
-            throw new \LogicException('This context was already initialized, and cannot be re-used.');
+            throw new LogicException('This context was already initialized, and cannot be re-used.');
         }
 
         $this->initialized = true;
@@ -117,7 +118,7 @@ abstract class Context
             return;
         }
 
-        throw new \LogicException('This context was already initialized and is immutable; you cannot modify it anymore.');
+        throw new LogicException('This context was already initialized and is immutable; you cannot modify it anymore.');
     }
 
     public function addExclusionStrategy(ExclusionStrategyInterface $strategy)
@@ -151,7 +152,7 @@ abstract class Context
     public function setVersion($version)
     {
         if (null === $version) {
-            throw new \LogicException('The version must not be null.');
+            throw new LogicException('The version must not be null.');
         }
 
         $this->attributes->set('version', $version);
@@ -167,7 +168,7 @@ abstract class Context
     public function setGroups($groups)
     {
         if (empty($groups)) {
-            throw new \LogicException('The groups must not be empty.');
+            throw new LogicException('The groups must not be empty.');
         }
 
         $this->attributes->set('groups', (array)$groups);
