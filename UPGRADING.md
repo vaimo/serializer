@@ -1,3 +1,28 @@
+From 1.6.x to 2.0.0
+===================
+
+- Removed the abstract classes `GenericSerializationVisitor` and `GenericDeserializationVisitor`, extend the specific visitor instead.
+- Added `GraphNavigatorInterface` interface, changed method signatures to use `GraphNavigatorInterface` instead of `GraphNavigator` class
+- `GraphNavigator` is an abstract class now and is ony for internal proposes
+- Removed deprecated method `VisitorInterface::getNavigator()` from all the visitors, use `Context::getNavigator()` instead
+- Removed deprecated method `JsonSerializationVisitor::addData`, use `JsonSerializationVisitor::setData` instead
+- Removed Propel and PhpCollection support
+- Changed default date format from `ISO8601` to `RFC3339`
+- Event listeners/handlers class names are case sensitive now
+- Changed default "serializeNull" value from `NULL` to `false`
+- Removed `Context::accept()` method, use `Context::getNavigator()->accept()` 
+- Removed `AbstractVisitor::getNamingStrategy()` method from all the visitors
+- Removed Symfony 2.x support
+- Removed PHP Driver metadata support
+- Removed in-object handler callbacks, use event listeners instead
+- Deprecated `VisitorInterface`, use `SerializationVisitorInterface` and `DeserializationVisitorInterface` instead
+- Changed `SerializerInterface::serialize` signature to `serialize($data, $format, SerializationContext $context = null, $type = null)`
+- Changed `ArrayTransformerInterface::toArray` signature to `toArray($data, SerializationContext $context = null, $type = null);`
+- Removed `Context::initialize`, use `DeserializationContext::initialize` and `SerializationContext::initialize`
+- Removed `Serializer::setSerializationContextFactory` and `Serializer::setDeserializationContextFactory`, context factories are now constructor parameters
+- Marked as `final` many classes, use composition over inheritance
+- PHP 7.1 is the minimum PHP version
+ 
 From 0.13 to ???
 ================
 
