@@ -127,8 +127,6 @@ final class FormErrorHandler implements SubscribingHandlerInterface
 
     private function convertFormToArray(SerializationVisitorInterface $visitor, Form $data)
     {
-        $isRoot = null === $visitor->getRoot();
-
         $form = new \ArrayObject();
         $errors = array();
         foreach ($data->getErrors() as $error) {
@@ -148,10 +146,6 @@ final class FormErrorHandler implements SubscribingHandlerInterface
 
         if ($children) {
             $form['children'] = $children;
-        }
-
-        if ($isRoot) {
-            $visitor->setRoot($form);
         }
 
         return $form;

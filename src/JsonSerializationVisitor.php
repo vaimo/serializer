@@ -34,8 +34,12 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
 
     public function setNavigator(GraphNavigatorInterface $navigator)
     {
+
+    }
+
+    public function initialize(GraphNavigatorInterface $navigator, $data)
+    {
         $this->navigator = $navigator;
-        $this->root = null;
         $this->dataStack = new \SplStack;
     }
 
@@ -46,37 +50,21 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
 
     public function visitString($data, array $type, Context $context)
     {
-        if (null === $this->root) {
-            $this->root = $data;
-        }
-
         return (string)$data;
     }
 
     public function visitBoolean($data, array $type, Context $context)
     {
-        if (null === $this->root) {
-            $this->root = $data;
-        }
-
         return (boolean)$data;
     }
 
     public function visitInteger($data, array $type, Context $context)
     {
-        if (null === $this->root) {
-            $this->root = $data;
-        }
-
         return (int)$data;
     }
 
     public function visitDouble($data, array $type, Context $context)
     {
-        if (null === $this->root) {
-            $this->root = $data;
-        }
-
         return (float)$data;
     }
 
@@ -92,12 +80,7 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
 
         $isHash = isset($type['params'][1]);
 
-        if (null === $this->root) {
-            $this->root = $isHash ? new ArrayObject() : array();
-            $rs = &$this->root;
-        } else {
-            $rs = $isHash ? new ArrayObject() : array();
-        }
+        $rs = $isHash ? new ArrayObject() : array();
 
         $isList = isset($type['params'][0]) && !isset($type['params'][1]);
 
@@ -130,10 +113,6 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
     {
         $rs = $this->data;
         $this->data = $this->dataStack->pop();
-
-        if (0 === $this->dataStack->count()) {
-            $this->root = $rs;
-        }
 
         return $rs;
     }
@@ -187,16 +166,16 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
     }
 
     /**
-     * @param array|\stdClass $data the passed data must be understood by whatever encoding function is applied later.
+     * @param mixed $data the passed data must be understood by whatever encoding function is applied later.
      */
-    public function setRoot($data)
+    public function setResult($data)
     {
         $this->root = $data;
     }
 
     public function getResult()
     {
-        $result = @json_encode($this->getRoot(), $this->options);
+        $result = @json_encode($this->root, $this->options);
 
         switch (json_last_error()) {
             case JSON_ERROR_NONE:

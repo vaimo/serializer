@@ -94,10 +94,6 @@ final class ConstraintViolationHandler implements SubscribingHandlerInterface
             'message' => $violation->getMessage()
         );
 
-        if (null === $visitor->getRoot()) {
-            $visitor->setRoot($data);
-        }
-
         return $data;
     }
 

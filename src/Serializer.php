@@ -159,8 +159,8 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
 
                 $type = $this->findInitialType($type, $context);
 
-                $this->visit($this->serializationNavigator, $visitor, $context, $data, 'json', $type);
-                $result = $this->removeInternalArrayObjects($visitor->getRoot());
+                $result = $this->visit($this->serializationNavigator, $visitor, $context, $data, 'json', $type);
+                $result = $this->removeInternalArrayObjects($result);
 
                 if (!is_array($result)) {
                     throw new RuntimeException(sprintf(
@@ -200,9 +200,15 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
             $this->factory
         );
 
-        $visitor->setNavigator($navigator);
-
-        return $navigator->accept($data, $type, $context);
+        if (method_exists($visitor, 'initialize')){
+            $visitor->initialize($navigator, $data);
+            $result = $navigator->accept($data, $type, $context);
+            $visitor->setResult($result);
+            return $result;
+        } else {
+            $visitor->setNavigator($navigator);
+            return $navigator->accept($data, $type, $context);
+        }
     }
 
     private function removeInternalArrayObjects($data)
