@@ -427,6 +427,32 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
         }
     }
 
+    public function testDeserializeWithTopHandler()
+    {
+        if ($this->getFormat() === 'yml') {
+            $this->markTestSkipped(sprintf("The format %s do not support transparent top handler deserializers", $this->getFormat()));
+            return;
+        }
+
+        $this->handlerRegistry->registerSubscribingHandler(new CustomAuthorSerializer());
+
+        $author1 = new Author("mike");
+        $author2 = new Author("tom");
+
+        $result = $this->serialize($author1);
+        $this->assertEquals($this->getContent('custom_author'), $result);
+
+        $result = $this->serialize([$author1, $author2], null, 'array<JMS\Serializer\Tests\Fixtures\Author>');
+        $this->assertEquals($this->getContent('custom_author_list'), $result);
+
+        $result = $this->serialize([$author1, $author2], null, 'array<string,JMS\Serializer\Tests\Fixtures\Author>');
+        $this->assertEquals($this->getContent('custom_author_map'), $result);
+
+        $blog = new Comment($author1, 'Foo');
+        $result = $this->serialize($blog);
+        $this->assertEquals($this->getContent('custom_author_comment'), $result);
+    }
+
     public function testDeserializeToArrayObjects()
     {
         if ($this->hasDeserializer()) {
@@ -1429,5 +1455,45 @@ class ArrayObjectHandler implements SubscribingHandlerInterface
     public function deserializeArrayObject(DeserializationVisitorInterface $visitor, $data, array $type, Context $context)
     {
         return new \ArrayObject($visitor->visitArray($data, $type, $context));
+    }
+}
+
+class CustomAuthorSerializer implements SubscribingHandlerInterface
+{
+    public static function getSubscribingMethods()
+    {
+        return [
+            [
+                'direction' => GraphNavigator::DIRECTION_SERIALIZATION,
+                'format' => 'json',
+                'type' => Author::class,
+                'method' => 'serializeJson',
+            ],
+            [
+                'direction' => GraphNavigator::DIRECTION_SERIALIZATION,
+                'format' => 'xml',
+                'type' => Author::class,
+                'method' => 'serializeXml',
+            ],
+        ];
+    }
+
+    public function serializeJson(JsonSerializationVisitor $visitor, Author $object, array $type, Context $context)
+    {
+        return [
+            'custom' => $object->getName()
+        ];
+    }
+
+    public function serializeXml(XmlSerializationVisitor $visitor, Author $object, array $type, Context $context)
+    {
+        if (!$visitor->getCurrentNode()) {
+            $visitor->createRoot(null, 'custom_author');
+        }
+        $document = $visitor->getDocument();
+        $current = $visitor->getCurrentNode();
+
+        $current->appendChild($document->createElement('custom', $object->getName()));
+        $current->appendChild($document->createElement('other', strrev($object->getName())));
     }
 }

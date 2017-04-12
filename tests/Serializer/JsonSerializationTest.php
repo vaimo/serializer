@@ -111,6 +111,10 @@ class JsonSerializationTest extends BaseSerializationTest
             $outputs['object_with_object_property_no_array_to_author'] = '{"foo": "bar", "author": "baz"}';
             $outputs['object_with_object_property'] = '{"foo": "bar", "author": {"full_name": "baz"}}';
             $outputs['author_expression'] = '{"my_first_name":"Ruud","last_name":"Kamphuis","id":123}';
+            $outputs['custom_author'] = '{"custom":"mike"}';
+            $outputs['custom_author_list'] = '[{"custom":"mike"},{"custom":"tom"}]';
+            $outputs['custom_author_map'] = '{"0":{"custom":"mike"},"1":{"custom":"tom"}}';
+            $outputs['custom_author_comment'] = '{"author":{"custom":"mike"},"text":"Foo"}';
         }
 
         if (!isset($outputs[$key])) {
