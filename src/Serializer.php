@@ -114,9 +114,13 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
 
                 $type = $this->findInitialType($type, $context);
 
-                $this->visit($this->serializationNavigator, $visitor, $context, $visitor->prepare($data), $format, $type);
+                $result = $this->visit($this->serializationNavigator, $visitor, $context, $visitor->prepare($data), $format, $type);
 
-                return $visitor->getResult();
+                if (method_exists($visitor, 'getString')) {
+                    return $visitor->getString($result);
+                } else {
+                    return $visitor->getResult();
+                }
             })
             ->getOrThrow(new UnsupportedFormatException(sprintf('The format "%s" is not supported for serialization.', $format)));
     }
@@ -200,17 +204,15 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
             $this->factory
         );
 
-        if (method_exists($visitor, 'initialize')){
-            $visitor->initialize($navigator, $data);
-            $result = $navigator->accept($data, $type, $context);
-            $visitor->setResult($result);
-            return $result;
-        } else {
-            $visitor->setNavigator($navigator);
-            return $navigator->accept($data, $type, $context);
-        }
+        $visitor->setNavigator($navigator);
+
+        return $navigator->accept($data, $type, $context);
     }
 
+    /**
+     * @param $data
+     * @return array
+     */
     private function removeInternalArrayObjects($data)
     {
         if ($data instanceof ArrayObject) {

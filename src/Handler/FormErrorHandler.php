@@ -57,21 +57,13 @@ final class FormErrorHandler implements SubscribingHandlerInterface
 
     public function serializeFormToXml(XmlSerializationVisitor $visitor, Form $form, array $type)
     {
-        if (null === $visitor->document) {
-            $visitor->document = $visitor->createDocument(null, null, false);
-            $visitor->document->appendChild($formNode = $visitor->document->createElement('form'));
-            $visitor->setCurrentNode($formNode);
-        } else {
-            $visitor->getCurrentNode()->appendChild(
-                $formNode = $visitor->document->createElement('form')
-            );
-        }
+        $formNode = $visitor->getDocument()->createElement('form');
 
         $formNode->setAttribute('name', $form->getName());
 
-        $formNode->appendChild($errorsNode = $visitor->document->createElement('errors'));
+        $formNode->appendChild($errorsNode = $visitor->getDocument()->createElement('errors'));
         foreach ($form->getErrors() as $error) {
-            $errorNode = $visitor->document->createElement('entry');
+            $errorNode = $visitor->getDocument()->createElement('entry');
             $errorNode->appendChild($this->serializeFormErrorToXml($visitor, $error, array()));
             $errorsNode->appendChild($errorNode);
         }
@@ -99,11 +91,7 @@ final class FormErrorHandler implements SubscribingHandlerInterface
 
     public function serializeFormErrorToXml(XmlSerializationVisitor $visitor, FormError $formError, array $type)
     {
-        if (null === $visitor->document) {
-            $visitor->document = $visitor->createDocument(null, null, true);
-        }
-
-        return $visitor->document->createCDATASection($this->getErrorMessage($formError));
+        return $visitor->getDocument()->createCDATASection($this->getErrorMessage($formError));
     }
 
     public function serializeFormErrorToJson(JsonSerializationVisitor $visitor, FormError $formError, array $type)

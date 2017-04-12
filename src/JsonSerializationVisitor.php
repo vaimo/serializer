@@ -34,11 +34,6 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
 
     public function setNavigator(GraphNavigatorInterface $navigator)
     {
-
-    }
-
-    public function initialize(GraphNavigatorInterface $navigator, $data)
-    {
         $this->navigator = $navigator;
         $this->dataStack = new \SplStack;
     }
@@ -167,15 +162,11 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
 
     /**
      * @param mixed $data the passed data must be understood by whatever encoding function is applied later.
+     * @return string
      */
-    public function setResult($data)
+    public function getString($data)
     {
-        $this->root = $data;
-    }
-
-    public function getResult()
-    {
-        $result = @json_encode($this->root, $this->options);
+        $result = @json_encode($data, $this->options);
 
         switch (json_last_error()) {
             case JSON_ERROR_NONE:
@@ -187,6 +178,11 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
             default:
                 throw new RuntimeException(sprintf('An error occurred while encoding your data (error code %d).', json_last_error()));
         }
+    }
+
+    public function getResult()
+    {
+        return $this->getString($this->root);
     }
 
     public function getOptions()
