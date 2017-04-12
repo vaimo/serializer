@@ -105,9 +105,4 @@ class YamlSerializationTest extends BaseSerializationTest
     {
         return 'yml';
     }
-
-    protected function hasDeserializer()
-    {
-        return false;
-    }
 }

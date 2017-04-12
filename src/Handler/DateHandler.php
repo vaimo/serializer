@@ -25,6 +25,7 @@ use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializationVisitorInterface;
 use JMS\Serializer\XmlDeserializationVisitor;
 use JMS\Serializer\XmlSerializationVisitor;
+use JMS\Serializer\YamlDeserializationVisitor;
 
 final class DateHandler implements SubscribingHandlerInterface
 {
@@ -146,6 +147,15 @@ final class DateHandler implements SubscribingHandlerInterface
         return $this->parseDateInterval($data);
     }
 
+    public function deserializeDateTimeFromYml(YamlDeserializationVisitor $visitor, $data, array $type)
+    {
+        if (null === $data) {
+            return null;
+        }
+
+        return $this->parseDateTime($data, $type);
+    }
+
     public function deserializeDateTimeFromJson(JsonDeserializationVisitor $visitor, $data, array $type)
     {
         if (null === $data) {
@@ -164,7 +174,25 @@ final class DateHandler implements SubscribingHandlerInterface
         return $this->parseDateTime($data, $type, true);
     }
 
+    public function deserializeDateTimeImmutableFromYml(YamlDeserializationVisitor $visitor, $data, array $type)
+    {
+        if (null === $data) {
+            return null;
+        }
+
+        return $this->parseDateTime($data, $type, true);
+    }
+
     public function deserializeDateIntervalFromJson(JsonDeserializationVisitor $visitor, $data, array $type)
+    {
+        if (null === $data) {
+            return null;
+        }
+
+        return $this->parseDateInterval($data);
+    }
+
+    public function deserializeDateIntervalFromYml(YamlDeserializationVisitor $visitor, $data, array $type)
     {
         if (null === $data) {
             return null;
