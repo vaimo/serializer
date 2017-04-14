@@ -49,7 +49,7 @@ class SerializationGraphNavigatorTest extends TestCase
             ->method('getDirection')
             ->will($this->returnValue(GraphNavigator::DIRECTION_SERIALIZATION));
 
-        $this->navigator->accept(STDIN, null, $this->context);
+        $this->navigator->acceptData(STDIN, null, $this->context);
     }
 
     public function testNavigatorPassesInstanceOnSerialization()
@@ -86,7 +86,7 @@ class SerializationGraphNavigatorTest extends TestCase
             ->will($this->returnValue($this->getMockBuilder(SerializationVisitorInterface::class)->getMock()));
 
         $this->navigator = new SerializationGraphNavigator($this->metadataFactory, $this->handlerRegistry, $this->dispatcher);
-        $this->navigator->accept($object, null, $this->context);
+        $this->navigator->acceptData($object, null, $this->context);
     }
 
     public function testNavigatorChangeTypeOnSerialization()
@@ -111,7 +111,7 @@ class SerializationGraphNavigatorTest extends TestCase
             ->will($this->returnValue($this->getMockBuilder(SerializationVisitorInterface::class)->getMock()));
 
         $this->navigator = new SerializationGraphNavigator($this->metadataFactory, $this->handlerRegistry, $this->dispatcher);
-        $this->navigator->accept($object, null, $this->context);
+        $this->navigator->acceptData($object, null, $this->context);
     }
 
     protected function setUp()

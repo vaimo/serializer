@@ -102,4 +102,14 @@ final class TypeParser extends \JMS\Parser\AbstractParser
 
         return array('name' => $typeName, 'params' => $params);
     }
+
+    /**
+     * @param $str
+     * @param mixed|null $context
+     * @return TypeDefinition
+     */
+    public function parseAsDefinition($str, $context = null)
+    {
+        return TypeDefinition::fromArray($this->parse($str, $context));
+    }
 }

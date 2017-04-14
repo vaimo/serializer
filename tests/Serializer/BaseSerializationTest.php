@@ -1383,15 +1383,12 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
         );
         $this->handlerRegistry->registerHandler(GraphNavigator::DIRECTION_DESERIALIZATION, 'AuthorList', $this->getFormat(),
             function (DeserializationVisitorInterface $visitor, $data, $type, Context $context) {
-                $type = array(
-                    'name' => 'array',
-                    'params' => array(
-                        array('name' => 'integer', 'params' => array()),
-                        array('name' => 'JMS\Serializer\Tests\Fixtures\Author', 'params' => array()),
-                    ),
-                );
+                $type = new TypeDefinition('array', [
+                    new TypeDefinition( 'integer'),
+                    new TypeDefinition('JMS\Serializer\Tests\Fixtures\Author'),
+                ]);
 
-                $elements = $context->getNavigator()->accept($data, $type, $context);
+                $elements = $context->getNavigator()->acceptData($data, $type, $context);
                 $list = new AuthorList();
                 foreach ($elements as $author) {
                     $list->add($author);

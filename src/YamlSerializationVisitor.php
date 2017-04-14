@@ -90,7 +90,7 @@ class YamlSerializationVisitor extends AbstractVisitor implements SerializationV
 
             $writer->indent();
 
-            if (null !== $v = $this->navigator->accept($v, $this->getElementType($type->getArray()), $context)) {
+            if (null !== $v = $this->navigator->acceptData($v, $this->findElementType($type), $context)) {
                 $writer
                     ->rtrim(false)
                     ->writeln(' ' . $v);
@@ -152,7 +152,7 @@ class YamlSerializationVisitor extends AbstractVisitor implements SerializationV
 
         $count = $this->writer->changeCount;
 
-        if (null !== $v = $this->navigator->accept($v, $metadata->type, $context)) {
+        if (null !== $v = $this->navigator->acceptData($v, TypeDefinition::fromArray($metadata->type), $context)) {
             $this->writer
                 ->rtrim(false)
                 ->writeln(' '.$v);

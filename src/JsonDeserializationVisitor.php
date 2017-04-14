@@ -83,7 +83,7 @@ class JsonDeserializationVisitor extends AbstractVisitor implements Deserializat
                 $result = array();
 
                 foreach ($data as $v) {
-                    $result[] = $this->navigator->accept($v, $listType->getArray(), $context);
+                    $result[] = $this->navigator->acceptData($v, $listType, $context);
                 }
 
                 return $result;
@@ -94,7 +94,7 @@ class JsonDeserializationVisitor extends AbstractVisitor implements Deserializat
                 $result = array();
 
                 foreach ($data as $k => $v) {
-                    $result[$k] = $this->navigator->accept($v, $entryType->getArray(), $context);
+                    $result[$k] = $this->navigator->acceptData($v, $entryType, $context);
                 }
 
                 return $result;
@@ -129,7 +129,7 @@ class JsonDeserializationVisitor extends AbstractVisitor implements Deserializat
             throw new RuntimeException(sprintf('You must define a type for %s::$%s.', $metadata->reflection->class, $metadata->name));
         }
 
-        $v = $data[$name] !== null ? $this->navigator->accept($data[$name], $metadata->type, $context) : null;
+        $v = $data[$name] !== null ? $this->navigator->acceptData($data[$name], TypeDefinition::fromArray($metadata->type), $context) : null;
 
         $this->accessor->setValue($this->currentObject, $v, $metadata);
 

@@ -132,9 +132,9 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
     private function findInitialType($type, SerializationContext $context)
     {
         if ($type !== null) {
-            return $this->typeParser->parse($type);
+            return $this->typeParser->parseAsDefinition($type);
         } elseif ($context->attributes->containsKey('initial_type')) {
-            return $this->typeParser->parse($context->attributes->get('initial_type')->get());
+            return $this->typeParser->parseAsDefinition($context->attributes->get('initial_type')->get());
         }
         return null;
     }
@@ -148,7 +148,7 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
         return $this->deserializationVisitors->get($format)
             ->map(function (DeserializationVisitorInterface $visitor) use ($context, $data, $format, $type) {
                 $preparedData = $visitor->prepare($data);
-                return $this->visit($this->deserializationNavigator, $visitor, $context, $preparedData, $format, $this->typeParser->parse($type));
+                return $this->visit($this->deserializationNavigator, $visitor, $context, $preparedData, $format, $this->typeParser->parseAsDefinition($type));
             })
             ->getOrThrow(new UnsupportedFormatException(sprintf('The format "%s" is not supported for deserialization.', $format)));
     }
@@ -194,12 +194,12 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
 
         return $this->deserializationVisitors->get('json')
             ->map(function (JsonDeserializationVisitor $visitor) use ($data, $type, $context) {
-                return $this->visit($this->deserializationNavigator, $visitor, $context, $data, 'json', $this->typeParser->parse($type));
+                return $this->visit($this->deserializationNavigator, $visitor, $context, $data, 'json', $this->typeParser->parseAsDefinition($type));
             })
             ->get();
     }
 
-    private function visit(GraphNavigatorInterface $navigator, $visitor, Context $context, $data, $format, array $type = null)
+    private function visit(GraphNavigatorInterface $navigator, $visitor, Context $context, $data, $format, TypeDefinition $type = null)
     {
         $context->initialize(
             $format,
@@ -214,7 +214,7 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
             $visitor->setNavigator($navigator);
         }
 
-        return $navigator->accept($data, $type, $context);
+        return $navigator->acceptData($data, $type, $context);
     }
 
     /**

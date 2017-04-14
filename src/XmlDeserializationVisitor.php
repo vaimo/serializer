@@ -150,7 +150,7 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
             case 1:
                 $result = array();
                 foreach ($nodes as $v) {
-                    $result[] = $this->navigator->accept($v, $type->getParam(0)->getArray(), $context);
+                    $result[] = $this->navigator->acceptData($v, $type->getParam(0), $context);
                 }
 
                 return $result;
@@ -170,7 +170,7 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
                         throw new RuntimeException(sprintf('The key attribute "%s" must be set for each entry of the map.', $this->currentMetadata->xmlKeyAttribute));
                     }
 
-                    $result[(string)$attrs[$this->currentMetadata->xmlKeyAttribute]] = $this->navigator->accept($v, $entryType->getArray(), $context);
+                    $result[(string)$attrs[$this->currentMetadata->xmlKeyAttribute]] = $this->navigator->acceptData($v, $entryType, $context);
                 }
 
                 return $result;
@@ -198,7 +198,7 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
 
             $attributes = $data->attributes($metadata->xmlNamespace);
             if (isset($attributes[$name])) {
-                $v = $this->navigator->accept($attributes[$name], $metadata->type, $context);
+                $v = $this->navigator->acceptData($attributes[$name], TypeDefinition::fromArray($metadata->type), $context);
                 $this->accessor->setValue($this->currentObject, $v, $metadata);
             }
 
@@ -206,7 +206,7 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
         }
 
         if ($metadata->xmlValue) {
-            $v = $this->navigator->accept($data, $metadata->type, $context);
+            $v = $this->navigator->acceptData($data, TypeDefinition::fromArray($metadata->type), $context);
             $this->accessor->setValue($this->currentObject, $v, $metadata);
 
             return;
@@ -219,7 +219,7 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
             }
 
             $this->setCurrentMetadata($metadata);
-            $v = $this->navigator->accept($enclosingElem, $metadata->type, $context);
+            $v = $this->navigator->acceptData($enclosingElem, TypeDefinition::fromArray($metadata->type), $context);
             $this->revertCurrentMetadata();
             $this->accessor->setValue($this->currentObject, $v, $metadata);
 
@@ -248,7 +248,7 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
             $node = reset($nodes);
         }
 
-        $v = $this->navigator->accept($node, $metadata->type, $context);
+        $v = $this->navigator->acceptData($node, TypeDefinition::fromArray($metadata->type), $context);
 
         $this->accessor->setValue($this->currentObject, $v, $metadata);
     }

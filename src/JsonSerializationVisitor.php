@@ -81,7 +81,7 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
         $isList = $type->hasParam(0) && !$type->hasParam(1);
 
         foreach ($data as $k => $v) {
-            $v = $this->navigator->accept($v, $this->findElementType($type)->getArray(), $context);
+            $v = $this->navigator->acceptData($v, $this->findElementType($type), $context);
 
             if (null === $v && $context->shouldSerializeNull() !== true) {
                 continue;
@@ -117,7 +117,7 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
     {
         $v = $this->accessor->getValue($data, $metadata);
 
-        $v = $this->navigator->accept($v, $metadata->type, $context);
+        $v = $this->navigator->acceptData($v, TypeDefinition::fromArray($metadata->type), $context);
         if (null === $v && $context->shouldSerializeNull() !== true) {
             return;
         }

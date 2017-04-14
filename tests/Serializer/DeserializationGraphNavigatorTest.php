@@ -27,6 +27,7 @@ use JMS\Serializer\EventDispatcher\EventDispatcher;
 use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\Handler\HandlerRegistry;
 use JMS\Serializer\Metadata\Driver\AnnotationDriver;
+use JMS\Serializer\TypeDefinition;
 use JMS\Serializer\VisitorInterface;
 use Metadata\MetadataFactory;
 use PHPUnit\Framework\TestCase;
@@ -72,7 +73,7 @@ class DeserializationGraphNavigatorTest extends TestCase
             ->will($this->returnValue($this->getMockBuilder(DeserializationVisitorInterface::class)->getMock()));
 
         $this->navigator = new DeserializationGraphNavigator($this->metadataFactory, $this->handlerRegistry, $this->dispatcher, $this->objectConstructor);
-        $this->navigator->accept('random', array('name' => $class, 'params' => array()), $this->context);
+        $this->navigator->acceptData('random', new TypeDefinition($class), $this->context);
     }
 
 

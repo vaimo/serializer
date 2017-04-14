@@ -182,7 +182,7 @@ class XmlSerializationVisitor extends AbstractVisitor implements SerializationVi
                 $entryNode->setAttribute($keyAttributeName, (string)$k);
             }
 
-            if (null !== $node = $this->navigator->accept($v, $this->findElementType($type)->getArray(), $context)) {
+            if (null !== $node = $this->navigator->acceptData($v, $this->findElementType($type), $context)) {
                 $this->currentNode->appendChild($node);
             }
 
@@ -213,7 +213,7 @@ class XmlSerializationVisitor extends AbstractVisitor implements SerializationVi
 
         if ($metadata->xmlAttribute) {
             $this->setCurrentMetadata($metadata);
-            $node = $this->navigator->accept($v, $metadata->type, $context);
+            $node = $this->navigator->acceptData($v, TypeDefinition::fromArray($metadata->type), $context);
             $this->revertCurrentMetadata();
 
             if (!$node instanceof \DOMCharacterData) {
@@ -235,7 +235,7 @@ class XmlSerializationVisitor extends AbstractVisitor implements SerializationVi
             $this->hasValue = true;
 
             $this->setCurrentMetadata($metadata);
-            $node = $this->navigator->accept($v, $metadata->type, $context);
+            $node = $this->navigator->acceptData($v, TypeDefinition::fromArray($metadata->type), $context);
             $this->revertCurrentMetadata();
 
             if (!$node instanceof \DOMCharacterData) {
@@ -254,7 +254,7 @@ class XmlSerializationVisitor extends AbstractVisitor implements SerializationVi
 
             foreach ($v as $key => $value) {
                 $this->setCurrentMetadata($metadata);
-                $node = $this->navigator->accept($value, null, $context);
+                $node = $this->navigator->acceptData($value, null, $context);
                 $this->revertCurrentMetadata();
 
                 if (!$node instanceof \DOMCharacterData) {
@@ -281,7 +281,7 @@ class XmlSerializationVisitor extends AbstractVisitor implements SerializationVi
 
         $this->setCurrentMetadata($metadata);
 
-        if (null !== $node = $this->navigator->accept($v, $metadata->type, $context)) {
+        if (null !== $node = $this->navigator->acceptData($v, TypeDefinition::fromArray($metadata->type), $context)) {
             $this->currentNode->appendChild($node);
         }
 
