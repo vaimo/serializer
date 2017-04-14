@@ -116,8 +116,8 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
 
                 $result = $this->visit($this->serializationNavigator, $visitor, $context, $visitor->prepare($data), $format, $type);
 
-                if (method_exists($visitor, 'getString')) {
-                    return $visitor->getString($result);
+                if ($visitor instanceof SerializationVisitorInterface) {
+                    return $visitor->getSerializationResult($result);
                 } else {
                     return $visitor->getResult();
                 }

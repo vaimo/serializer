@@ -231,7 +231,7 @@ class JsonSerializationTest extends BaseSerializationTest
     {
         $visitor = $this->serializationVisitors->get('json')->get();
         $functionToCall = 'visit' . ucfirst($primitiveType);
-        $result = $visitor->$functionToCall($data, array(), $this->getMockBuilder('JMS\Serializer\Context')->getMock());
+        $result = $visitor->$functionToCall($data, array(), $this->getMockBuilder('JMS\Serializer\SerializationContext')->getMock());
         if ($primitiveType == 'double') {
             $primitiveType = 'float';
         }

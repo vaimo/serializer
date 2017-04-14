@@ -29,7 +29,7 @@ use JMS\Serializer\Naming\PropertyNamingStrategyInterface;
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-class XmlSerializationVisitor extends AbstractVisitor implements SerializationVisitorInterface
+class XmlSerializationVisitor extends AbstractVisitor
 {
     /**
      * @var \DOMDocument

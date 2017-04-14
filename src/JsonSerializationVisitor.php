@@ -32,55 +32,55 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
     private $dataStack;
     private $data;
 
-    public function setNavigator(GraphNavigatorInterface $navigator)
+    public function initialize(GraphNavigatorInterface $navigator):void
     {
         $this->navigator = $navigator;
         $this->dataStack = new \SplStack;
     }
 
-    public function visitNull($data, array $type, Context $context)
+    public function serializeNull(TypeDefinition $type, SerializationContext $context)
     {
         return null;
     }
 
-    public function visitString($data, array $type, Context $context)
+    public function serializeString($data, TypeDefinition $type, SerializationContext $context)
     {
         return (string)$data;
     }
 
-    public function visitBoolean($data, array $type, Context $context)
+    public function serializeBoolean($data, TypeDefinition $type, SerializationContext $context)
     {
         return (boolean)$data;
     }
 
-    public function visitInteger($data, array $type, Context $context)
+    public function serializeInteger($data, TypeDefinition $type, SerializationContext $context)
     {
         return (int)$data;
     }
 
-    public function visitDouble($data, array $type, Context $context)
+    public function serializeDouble($data, TypeDefinition $type, SerializationContext $context)
     {
         return (float)$data;
     }
 
     /**
      * @param array $data
-     * @param array $type
-     * @param Context $context
+     * @param TypeDefinition $type
+     * @param SerializationContext $context
      * @return mixed
      */
-    public function visitArray($data, array $type, Context $context)
+    public function serializeArray($data, TypeDefinition $type, SerializationContext $context)
     {
         $this->dataStack->push($data);
 
-        $isHash = isset($type['params'][1]);
+        $isHash = $type->hasParam(1);
 
         $rs = $isHash ? new ArrayObject() : array();
 
-        $isList = isset($type['params'][0]) && !isset($type['params'][1]);
+        $isList = $type->hasParam(0) && !$type->hasParam(1);
 
         foreach ($data as $k => $v) {
-            $v = $this->navigator->accept($v, $this->getElementType($type), $context);
+            $v = $this->navigator->accept($v, $this->getElementType($type->getArray()), $context);
 
             if (null === $v && $context->shouldSerializeNull() !== true) {
                 continue;
@@ -98,13 +98,13 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
         return $rs;
     }
 
-    public function startVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context)
+    public function startSerializingObject(ClassMetadata $metadata, $data, TypeDefinition $type, SerializationContext $context):void
     {
         $this->dataStack->push($this->data);
         $this->data = new ArrayObject();
     }
 
-    public function endVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context)
+    public function endSerializingObject(ClassMetadata $metadata, $data, TypeDefinition $type, SerializationContext $context)
     {
         $rs = $this->data;
         $this->data = $this->dataStack->pop();
@@ -112,7 +112,7 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
         return $rs;
     }
 
-    public function visitProperty(PropertyMetadata $metadata, $data, Context $context)
+    public function serializeProperty(PropertyMetadata $metadata, $data, SerializationContext $context):void
     {
         $v = $this->accessor->getValue($data, $metadata);
 
@@ -164,7 +164,7 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
      * @param mixed $data the passed data must be understood by whatever encoding function is applied later.
      * @return string
      */
-    public function getString($data)
+    public function getSerializationResult($data)
     {
         $result = @json_encode($data, $this->options);
 
@@ -180,11 +180,6 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
         }
     }
 
-    public function getResult()
-    {
-        return $this->getString($this->root);
-    }
-
     public function getOptions()
     {
         return $this->options;
@@ -193,5 +188,95 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
     public function setOptions($options)
     {
         $this->options = (integer)$options;
+    }
+
+
+
+    /**
+     * @deprecated
+     */
+    public function getResult()
+    {
+        return $this->getSerializationResult($this->root);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function visitNull($data, array $type, Context $context)
+    {
+        return $this->serializeNull(TypeDefinition::fromArray($type), $context);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function visitString($data, array $type, Context $context)
+    {
+        return $this->serializeString($data, TypeDefinition::fromArray($type), $context);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function visitBoolean($data, array $type, Context $context)
+    {
+        return $this->serializeBoolean($data, TypeDefinition::fromArray($type), $context);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function visitDouble($data, array $type, Context $context)
+    {
+        return $this->serializeDouble($data, TypeDefinition::fromArray($type), $context);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function visitInteger($data, array $type, Context $context)
+    {
+        return $this->serializeInteger($data, TypeDefinition::fromArray($type), $context);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function visitArray($data, array $type, Context $context)
+    {
+        return $this->serializeArray($data, TypeDefinition::fromArray($type), $context);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function startVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context)
+    {
+        $this->startSerializingObject($metadata, $data, TypeDefinition::fromArray($type), $context);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function visitProperty(PropertyMetadata $metadata, $data, Context $context)
+    {
+        $this->serializeProperty($metadata, $data, $context);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function endVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context)
+    {
+        return $this->endSerializingObject($metadata, $data, TypeDefinition::fromArray($type), $context);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function setNavigator(GraphNavigatorInterface $navigator)
+    {
+        $this->initialize($navigator);
     }
 }

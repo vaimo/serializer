@@ -22,7 +22,7 @@ use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\Metadata\PropertyMetadata;
 
 /**
- * Interface for visitors.
+ * Interface for serializing visitors.
  *
  * This contains the minimal set of values that must be supported for any
  * output format.
@@ -32,82 +32,100 @@ use JMS\Serializer\Metadata\PropertyMetadata;
 interface SerializationVisitorInterface
 {
     /**
+     * Allows visitors to convert the input data to a different representation
+     * before the actual serialization/deserialization process starts.
+     *
      * @param mixed $data
-     * @param array $type
      *
      * @return mixed
      */
-    public function visitNull($data, array $type, Context $context);
+    public function prepare($data);
 
     /**
-     * @param mixed $data
-     * @param array $type
+     * @param TypeDefinition $type
+     * @param SerializationContext $context
      *
      * @return mixed
      */
-    public function visitString($data, array $type, Context $context);
+    public function serializeNull(TypeDefinition $type, SerializationContext $context);
 
     /**
      * @param mixed $data
-     * @param array $type
+     * @param TypeDefinition $type
+     * @param SerializationContext $context
      *
      * @return mixed
      */
-    public function visitBoolean($data, array $type, Context $context);
+    public function serializeString($data, TypeDefinition $type, SerializationContext $context);
 
     /**
      * @param mixed $data
-     * @param array $type
+     * @param TypeDefinition $type
+     * @param SerializationContext $context
      *
      * @return mixed
      */
-    public function visitDouble($data, array $type, Context $context);
+    public function serializeBoolean($data, TypeDefinition $type, SerializationContext $context);
 
     /**
      * @param mixed $data
-     * @param array $type
+     * @param TypeDefinition $type
+     * @param SerializationContext $context
      *
      * @return mixed
      */
-    public function visitInteger($data, array $type, Context $context);
+    public function serializeDouble($data, TypeDefinition $type, SerializationContext $context);
 
     /**
      * @param mixed $data
-     * @param array $type
+     * @param TypeDefinition $type
+     * @param SerializationContext $context
      *
      * @return mixed
      */
-    public function visitArray($data, array $type, Context $context);
+    public function serializeInteger($data, TypeDefinition $type, SerializationContext $context);
 
     /**
-     * Called before the properties of the object are being visited.
+     * @param mixed $data
+     * @param TypeDefinition $type
+     * @param SerializationContext $context
+     *
+     * @return mixed
+     */
+    public function serializeArray($data, TypeDefinition $type, SerializationContext $context);
+
+    /**
+     * Called before the properties of the object are being serializeed.
      *
      * @param ClassMetadata $metadata
      * @param mixed $data
-     * @param array $type
+     * @param TypeDefinition $type
+     * @param SerializationContext $context
      *
      * @return void
      */
-    public function startVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context);
+    public function startSerializingObject(ClassMetadata $metadata, $data, TypeDefinition $type, SerializationContext $context):void;
 
     /**
      * @param PropertyMetadata $metadata
      * @param mixed $data
+     * @param SerializationContext $context
      *
      * @return void
      */
-    public function visitProperty(PropertyMetadata $metadata, $data, Context $context);
+    public function serializeProperty(PropertyMetadata $metadata, $data, SerializationContext $context):void;
 
     /**
-     * Called after all properties of the object have been visited.
+     * Called after all properties of the object have been serialized.
      *
      * @param ClassMetadata $metadata
      * @param mixed $data
-     * @param array $type
+     * @param TypeDefinition $type
+     * @param SerializationContext $context
      *
      * @return mixed
      */
-    public function endVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context);
+    public function endSerializingObject(ClassMetadata $metadata, $data, TypeDefinition $type, SerializationContext $context);
 
     /**
      * Called before serialization/deserialization starts.
@@ -116,10 +134,11 @@ interface SerializationVisitorInterface
      *
      * @return void
      */
-    public function setNavigator(GraphNavigatorInterface $navigator);
+    public function initialize(GraphNavigatorInterface $navigator):void;
 
     /**
+     * @param mixed $data
      * @return mixed
      */
-    public function getResult();
+    public function getSerializationResult($data);
 }

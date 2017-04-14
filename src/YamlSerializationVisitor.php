@@ -31,7 +31,7 @@ use Symfony\Component\Yaml\Inline;
  * @see http://www.yaml.org/spec/
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-class YamlSerializationVisitor extends AbstractVisitor implements SerializationVisitorInterface
+class YamlSerializationVisitor extends AbstractVisitor
 {
     public $writer;
 
