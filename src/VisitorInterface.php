@@ -26,7 +26,7 @@ use JMS\Serializer\Metadata\PropertyMetadata;
  *
  * This contains the minimal set of values that must be supported for any
  * output format.
- *
+ * @deprecated
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
 interface VisitorInterface
@@ -132,7 +132,5 @@ interface VisitorInterface
      * @return object|array|scalar
      */
     public function getResult();
-
-
 
 }

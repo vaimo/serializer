@@ -366,7 +366,7 @@ class XmlSerializationTest extends BaseSerializationTest
                 $metadata->xmlNamespace = $classMetadata->xmlRootNamespace;
                 $metadata->xmlNamespace = $classMetadata->xmlRootNamespace;
 
-                $visitor->visitProperty($metadata, $author, $context);
+                $visitor->serializeProperty($metadata, $author, $context);
             }
         );
 

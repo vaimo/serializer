@@ -32,16 +32,6 @@ use JMS\Serializer\Metadata\PropertyMetadata;
 interface SerializationVisitorInterface
 {
     /**
-     * Allows visitors to convert the input data to a different representation
-     * before the actual serialization/deserialization process starts.
-     *
-     * @param mixed $data
-     *
-     * @return mixed
-     */
-    public function prepare($data);
-
-    /**
      * @param TypeDefinition $type
      * @param SerializationContext $context
      *
@@ -74,7 +64,7 @@ interface SerializationVisitorInterface
      *
      * @return mixed
      */
-    public function serializeDouble($data, TypeDefinition $type, SerializationContext $context);
+    public function serializeFloat($data, TypeDefinition $type, SerializationContext $context);
 
     /**
      * @param mixed $data

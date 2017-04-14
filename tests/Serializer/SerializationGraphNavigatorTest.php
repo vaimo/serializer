@@ -108,7 +108,7 @@ class SerializationGraphNavigatorTest extends TestCase
 
         $this->context->expects($this->any())
             ->method('getVisitor')
-            ->will($this->returnValue($this->getMockBuilder(VisitorInterface::class)->getMock()));
+            ->will($this->returnValue($this->getMockBuilder(SerializationVisitorInterface::class)->getMock()));
 
         $this->navigator = new SerializationGraphNavigator($this->metadataFactory, $this->handlerRegistry, $this->dispatcher);
         $this->navigator->accept($object, null, $this->context);

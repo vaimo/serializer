@@ -40,24 +40,20 @@ abstract class AbstractVisitor implements VisitorInterface
         $this->accessor = $accessorStrategy ?: new DefaultAccessorStrategy();
     }
 
-    public function prepare($data)
-    {
-        return $data;
-    }
-
     /**
-     * @param array $typeArray
+     * @param TypeDefinition $type
+     * @return TypeDefinition
      */
-    protected function getElementType($typeArray)
+    protected function findElementType(TypeDefinition $type)
     {
-        if (false === isset($typeArray['params'][0])) {
-            return null;
+        if (!$type->hasParam(0)) {
+            return TypeDefinition::getUnknown();
         }
 
-        if (isset($typeArray['params'][1]) && is_array($typeArray['params'][1])) {
-            return $typeArray['params'][1];
+        if ($type->hasParam(1) && $type->getParam(0) instanceof TypeDefinition) {
+            return $type->getParam(1);
         } else {
-            return $typeArray['params'][0];
+            return $type->getParam(0);
         }
     }
 

@@ -22,6 +22,7 @@ use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\Metadata\StaticPropertyMetadata;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializationVisitorInterface;
+use JMS\Serializer\TypeDefinition;
 
 /**
  * @author Asmir Mustafic <goetas@gmail.com>
@@ -47,14 +48,16 @@ final class StdClassHandler implements SubscribingHandlerInterface
 
     public function serializeStdClass(SerializationVisitorInterface $visitor, \stdClass $stdClass, array $type, SerializationContext $context)
     {
-        $classMetadata = $context->getMetadataFactory()->getMetadataForClass('stdClass');
-        $visitor->startVisitingObject($classMetadata, $stdClass, array('name' => 'stdClass'), $context);
+        $type = new TypeDefinition('stdClass');
+
+        $classMetadata = $context->getMetadataFactory()->getMetadataForClass($type->getName());
+        $visitor->startSerializingObject($classMetadata, $stdClass, $type, $context);
 
         foreach ((array)$stdClass as $name => $value) {
-            $metadata = new StaticPropertyMetadata('stdClass', $name, $value);
-            $visitor->visitProperty($metadata, $value, $context);
+            $metadata = new StaticPropertyMetadata($type->getName(), $name, $value);
+            $visitor->serializeProperty($metadata, $value, $context);
         }
 
-        return $visitor->endVisitingObject($classMetadata, $stdClass, array('name' => 'stdClass'), $context);
+        return $visitor->endSerializingObject($classMetadata, $stdClass, $type, $context);
     }
 }

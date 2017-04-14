@@ -28,6 +28,7 @@ use JMS\Serializer\SerializationVisitorInterface;
 use JMS\Serializer\Tests\Fixtures\Author;
 use JMS\Serializer\Tests\Fixtures\AuthorList;
 use JMS\Serializer\Tests\Fixtures\Tag;
+use JMS\Serializer\TypeDefinition;
 
 class JsonSerializationTest extends BaseSerializationTest
 {
@@ -138,7 +139,7 @@ class JsonSerializationTest extends BaseSerializationTest
 
         $this->handlerRegistry->registerHandler(GraphNavigator::DIRECTION_SERIALIZATION, 'JMS\Serializer\Tests\Fixtures\AuthorList', 'json',
             function (SerializationVisitorInterface $visitor, AuthorList $data, array $type, Context $context) {
-                return $visitor->visitArray(iterator_to_array($data), $type, $context);
+                return $visitor->serializeArray(iterator_to_array($data), TypeDefinition::fromArray($type), $context);
             }
         );
 
@@ -154,7 +155,7 @@ class JsonSerializationTest extends BaseSerializationTest
         $this->dispatcher->addSubscriber(new ReplaceNameSubscriber());
         $this->handlerRegistry->registerHandler(GraphNavigator::DIRECTION_SERIALIZATION, 'JMS\Serializer\Tests\Fixtures\AuthorList', 'json',
             function (SerializationVisitorInterface $visitor, AuthorList $data, array $type, Context $context) {
-                return $visitor->visitArray(iterator_to_array($data), $type, $context);
+                return $visitor->serializeArray(iterator_to_array($data), TypeDefinition::fromArray($type), $context);
             }
         );
 
@@ -214,11 +215,11 @@ class JsonSerializationTest extends BaseSerializationTest
                 'data' => 123,
             ),
             array(
-                'type' => 'double',
+                'type' => 'float',
                 'data' => 0.1234,
             ),
             array(
-                'type' => 'double',
+                'type' => 'float',
                 'data' => "0.1234",
             ),
         );
@@ -230,11 +231,8 @@ class JsonSerializationTest extends BaseSerializationTest
     public function testPrimitiveTypes($primitiveType, $data)
     {
         $visitor = $this->serializationVisitors->get('json')->get();
-        $functionToCall = 'visit' . ucfirst($primitiveType);
-        $result = $visitor->$functionToCall($data, array(), $this->getMockBuilder('JMS\Serializer\SerializationContext')->getMock());
-        if ($primitiveType == 'double') {
-            $primitiveType = 'float';
-        }
+        $functionToCall = 'serialize' . ucfirst($primitiveType);
+        $result = $visitor->$functionToCall($data, new TypeDefinition($primitiveType), $this->getMockBuilder('JMS\Serializer\SerializationContext')->getMock());
         $this->assertInternalType($primitiveType, $result);
     }
 

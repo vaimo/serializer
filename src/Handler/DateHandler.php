@@ -23,6 +23,7 @@ use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\JsonDeserializationVisitor;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializationVisitorInterface;
+use JMS\Serializer\TypeDefinition;
 use JMS\Serializer\XmlDeserializationVisitor;
 use JMS\Serializer\XmlSerializationVisitor;
 use JMS\Serializer\YamlDeserializationVisitor;
@@ -77,15 +78,15 @@ final class DateHandler implements SubscribingHandlerInterface
     )
     {
         if ($visitor instanceof XmlSerializationVisitor && false === $this->xmlCData) {
-            return $visitor->visitSimpleString($date->format($this->getFormat($type)), $type, $context);
+            return $visitor->serializeSimpleString($date->format($this->getFormat($type)), TypeDefinition::fromArray($type), $context);
         }
 
         $format = $this->getFormat($type);
         if ('U' === $format) {
-            return $visitor->visitInteger($date->format($format), $type, $context);
+            return $visitor->serializeInteger($date->format($format), TypeDefinition::fromArray($type), $context);
         }
 
-        return $visitor->visitString($date->format($this->getFormat($type)), $type, $context);
+        return $visitor->serializeString($date->format($this->getFormat($type)), TypeDefinition::fromArray($type), $context);
     }
 
     public function serializeDateTime(SerializationVisitorInterface $visitor, \DateTime $date, array $type, SerializationContext $context)
@@ -108,10 +109,10 @@ final class DateHandler implements SubscribingHandlerInterface
         $iso8601DateIntervalString = $this->format($date);
 
         if ($visitor instanceof XmlSerializationVisitor && false === $this->xmlCData) {
-            return $visitor->visitSimpleString($iso8601DateIntervalString, $type, $context);
+            return $visitor->serializeSimpleString($iso8601DateIntervalString, TypeDefinition::fromArray($type), $context);
         }
 
-        return $visitor->visitString($iso8601DateIntervalString, $type, $context);
+        return $visitor->serializeString($iso8601DateIntervalString, TypeDefinition::fromArray($type), $context);
     }
 
     private function isDataXmlNull($data)

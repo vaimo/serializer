@@ -25,6 +25,7 @@ use JMS\Serializer\DeserializationVisitorInterface;
 use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializationVisitorInterface;
+use JMS\Serializer\TypeDefinition;
 
 final class ArrayCollectionHandler implements SubscribingHandlerInterface
 {
@@ -68,7 +69,7 @@ final class ArrayCollectionHandler implements SubscribingHandlerInterface
 
         // We change the base type, and pass through possible parameters.
         $type['name'] = 'array';
-        $result = $visitor->visitArray($collection->toArray(), $type, $context);
+        $result = $visitor->serializeArray($collection->toArray(), TypeDefinition::fromArray($type), $context);
 
         //  Push ourselves back in, so we can be popped after leaving the handler
         $context->startVisiting($collection);

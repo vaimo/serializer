@@ -114,7 +114,11 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
 
                 $type = $this->findInitialType($type, $context);
 
-                $result = $this->visit($this->serializationNavigator, $visitor, $context, $visitor->prepare($data), $format, $type);
+                if (!$visitor instanceof SerializationVisitorInterface) {
+                    $data = $visitor->prepare($data);
+                }
+
+                $result = $this->visit($this->serializationNavigator, $visitor, $context, $data, $format, $type);
 
                 if ($visitor instanceof SerializationVisitorInterface) {
                     return $visitor->getSerializationResult($result);
@@ -204,7 +208,11 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
             $this->factory
         );
 
-        $visitor->setNavigator($navigator);
+        if ($visitor instanceof SerializationVisitorInterface) {
+            $visitor->initialize($navigator);
+        } else {
+            $visitor->setNavigator($navigator);
+        }
 
         return $navigator->accept($data, $type, $context);
     }

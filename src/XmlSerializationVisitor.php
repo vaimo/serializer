@@ -29,14 +29,13 @@ use JMS\Serializer\Naming\PropertyNamingStrategyInterface;
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-class XmlSerializationVisitor extends AbstractVisitor
+class XmlSerializationVisitor extends AbstractVisitor implements SerializationVisitorInterface
 {
+    use LegacyTrait;
     /**
      * @var \DOMDocument
      */
     private $document;
-
-    private $initialRoot;
 
     private $navigator;
     private $defaultRootName = 'result';
@@ -85,13 +84,14 @@ class XmlSerializationVisitor extends AbstractVisitor
         $this->defaultEncoding = $encoding;
     }
 
-    public function setNavigator(GraphNavigatorInterface $navigator)
+    public function initialize(GraphNavigatorInterface $navigator):void
     {
         $this->navigator = $navigator;
         $this->stack = new \SplStack;
         $this->metadataStack = new \SplStack;
 
         $this->currentNode = null;
+        $this->nullWasVisited = false;
 
         $version = null;
         $encoding = null;
@@ -120,7 +120,7 @@ class XmlSerializationVisitor extends AbstractVisitor
         return $rootNode;
     }
 
-    public function visitNull($data, array $type, Context $context)
+    public function serializeNull(TypeDefinition $type, SerializationContext $context)
     {
         $node = $this->document->createAttribute('xsi:nil');
         $node->value = 'true';
@@ -129,34 +129,34 @@ class XmlSerializationVisitor extends AbstractVisitor
         return $node;
     }
 
-    public function visitString($data, array $type, Context $context)
+    public function serializeString($data, TypeDefinition $type, SerializationContext $context)
     {
         $doCData = null !== $this->currentMetadata ? $this->currentMetadata->xmlElementCData : true;
 
         return $doCData ? $this->document->createCDATASection($data) : $this->document->createTextNode((string)$data);
     }
 
-    public function visitSimpleString($data, array $type, Context $context)
+    public function serializeSimpleString($data, TypeDefinition $type, SerializationContext $context)
     {
         return $this->document->createTextNode((string)$data);
     }
 
-    public function visitBoolean($data, array $type, Context $context)
+    public function serializeBoolean($data, TypeDefinition $type, SerializationContext $context)
     {
         return $this->document->createTextNode($data ? 'true' : 'false');
     }
 
-    public function visitInteger($data, array $type, Context $context)
+    public function serializeInteger($data, TypeDefinition $type, SerializationContext $context)
     {
-        return $this->visitNumeric($data, $type);
+        return $this->serializeNumeric($data, $type);
     }
 
-    public function visitDouble($data, array $type, Context $context)
+    public function serializeFloat($data, TypeDefinition $type, SerializationContext $context)
     {
-        return $this->visitNumeric($data, $type);
+        return $this->serializeNumeric($data, $type);
     }
 
-    public function visitArray($data, array $type, Context $context)
+    public function serializeArray($data, TypeDefinition $type, SerializationContext $context)
     {
         if ($this->currentNode === null) {
             $this->createRoot();
@@ -182,7 +182,7 @@ class XmlSerializationVisitor extends AbstractVisitor
                 $entryNode->setAttribute($keyAttributeName, (string)$k);
             }
 
-            if (null !== $node = $this->navigator->accept($v, $this->getElementType($type), $context)) {
+            if (null !== $node = $this->navigator->accept($v, $this->findElementType($type)->getArray(), $context)) {
                 $this->currentNode->appendChild($node);
             }
 
@@ -190,7 +190,7 @@ class XmlSerializationVisitor extends AbstractVisitor
         }
     }
 
-    public function startVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context)
+    public function startSerializingObject(ClassMetadata $metadata, $data, TypeDefinition $type, SerializationContext $context):void
     {
         $this->objectMetadataStack->push($metadata);
 
@@ -203,7 +203,7 @@ class XmlSerializationVisitor extends AbstractVisitor
         $this->hasValue = false;
     }
 
-    public function visitProperty(PropertyMetadata $metadata, $object, Context $context)
+    public function serializeProperty(PropertyMetadata $metadata, $object, SerializationContext $context):void
     {
         $v = $this->accessor->getValue($object, $metadata);
 
@@ -313,17 +313,12 @@ class XmlSerializationVisitor extends AbstractVisitor
         return !$element->hasChildNodes() && !$element->hasAttributes();
     }
 
-    public function endVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context)
+    public function endSerializingObject(ClassMetadata $metadata, $data, TypeDefinition $type, SerializationContext $context)
     {
         $this->objectMetadataStack->pop();
     }
 
-    public function getResult()
-    {
-        return $this->getString();
-    }
-
-    public function getString($node = null)
+    public function getSerializationResult($node)
     {
         if ($this->document->documentElement === null) {
             if ($node instanceof \DOMElement) {
@@ -389,14 +384,7 @@ class XmlSerializationVisitor extends AbstractVisitor
         return $this->currentMetadata = $this->metadataStack->pop();
     }
 
-    public function prepare($data)
-    {
-        $this->nullWasVisited = false;
-
-        return $data;
-    }
-
-    private function visitNumeric($data, array $type)
+    private function serializeNumeric($data, TypeDefinition $type)
     {
         return $this->document->createTextNode((string)$data);
     }
@@ -477,5 +465,21 @@ class XmlSerializationVisitor extends AbstractVisitor
     public function setFormatOutput($formatOutput)
     {
         $this->formatOutput = (boolean)$formatOutput;
+    }
+
+    /**
+     * @deprecated
+     */
+    public function getResult()
+    {
+        return $this->getSerializationResult( $this->document->documentElement);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function visitSimpleString($data, array $type, Context $context)
+    {
+        return $this->serializeSimpleString($data, TypeDefinition::fromArray($type), $context);
     }
 }

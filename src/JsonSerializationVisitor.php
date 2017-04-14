@@ -25,6 +25,8 @@ use JMS\Serializer\Util\ArrayObject;
 
 class JsonSerializationVisitor extends AbstractVisitor implements SerializationVisitorInterface
 {
+    use LegacyTrait;
+
     private $options = 0;
 
     private $navigator;
@@ -58,7 +60,7 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
         return (int)$data;
     }
 
-    public function serializeDouble($data, TypeDefinition $type, SerializationContext $context)
+    public function serializeFloat($data, TypeDefinition $type, SerializationContext $context)
     {
         return (float)$data;
     }
@@ -80,7 +82,7 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
         $isList = $type->hasParam(0) && !$type->hasParam(1);
 
         foreach ($data as $k => $v) {
-            $v = $this->navigator->accept($v, $this->getElementType($type->getArray()), $context);
+            $v = $this->navigator->accept($v, $this->findElementType($type)->getArray(), $context);
 
             if (null === $v && $context->shouldSerializeNull() !== true) {
                 continue;
@@ -190,8 +192,6 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
         $this->options = (integer)$options;
     }
 
-
-
     /**
      * @deprecated
      */
@@ -200,83 +200,4 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
         return $this->getSerializationResult($this->root);
     }
 
-    /**
-     * @deprecated
-     */
-    public function visitNull($data, array $type, Context $context)
-    {
-        return $this->serializeNull(TypeDefinition::fromArray($type), $context);
-    }
-
-    /**
-     * @deprecated
-     */
-    public function visitString($data, array $type, Context $context)
-    {
-        return $this->serializeString($data, TypeDefinition::fromArray($type), $context);
-    }
-
-    /**
-     * @deprecated
-     */
-    public function visitBoolean($data, array $type, Context $context)
-    {
-        return $this->serializeBoolean($data, TypeDefinition::fromArray($type), $context);
-    }
-
-    /**
-     * @deprecated
-     */
-    public function visitDouble($data, array $type, Context $context)
-    {
-        return $this->serializeDouble($data, TypeDefinition::fromArray($type), $context);
-    }
-
-    /**
-     * @deprecated
-     */
-    public function visitInteger($data, array $type, Context $context)
-    {
-        return $this->serializeInteger($data, TypeDefinition::fromArray($type), $context);
-    }
-
-    /**
-     * @deprecated
-     */
-    public function visitArray($data, array $type, Context $context)
-    {
-        return $this->serializeArray($data, TypeDefinition::fromArray($type), $context);
-    }
-
-    /**
-     * @deprecated
-     */
-    public function startVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context)
-    {
-        $this->startSerializingObject($metadata, $data, TypeDefinition::fromArray($type), $context);
-    }
-
-    /**
-     * @deprecated
-     */
-    public function visitProperty(PropertyMetadata $metadata, $data, Context $context)
-    {
-        $this->serializeProperty($metadata, $data, $context);
-    }
-
-    /**
-     * @deprecated
-     */
-    public function endVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context)
-    {
-        return $this->endSerializingObject($metadata, $data, TypeDefinition::fromArray($type), $context);
-    }
-
-    /**
-     * @deprecated
-     */
-    public function setNavigator(GraphNavigatorInterface $navigator)
-    {
-        $this->initialize($navigator);
-    }
 }

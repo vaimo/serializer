@@ -88,24 +88,24 @@ final class SerializationGraphNavigator extends GraphNavigator implements GraphN
 
         switch ($type['name']) {
             case 'NULL':
-                return $visitor->visitNull($data, $type, $context);
+                return $visitor->serializeNull(TypeDefinition::fromArray($type), $context);
 
             case 'string':
-                return $visitor->visitString($data, $type, $context);
+                return $visitor->serializeString($data, TypeDefinition::fromArray($type), $context);
 
             case 'int':
             case 'integer':
-                return $visitor->visitInteger($data, $type, $context);
+                return $visitor->serializeInteger($data, TypeDefinition::fromArray($type), $context);
 
             case 'boolean':
-                return $visitor->visitBoolean($data, $type, $context);
+                return $visitor->serializeBoolean($data, TypeDefinition::fromArray($type), $context);
 
             case 'double':
             case 'float':
-                return $visitor->visitDouble($data, $type, $context);
+                return $visitor->serializeFloat($data, TypeDefinition::fromArray($type), $context);
 
             case 'array':
-                return $visitor->visitArray($data, $type, $context);
+                return $visitor->serializeArray($data, TypeDefinition::fromArray($type), $context);
 
             case 'resource':
                 $msg = 'Resources are not supported in serialized data.';
@@ -171,7 +171,7 @@ final class SerializationGraphNavigator extends GraphNavigator implements GraphN
                 }
                 $object = $data;
 
-                $visitor->startVisitingObject($metadata, $object, $type, $context);
+                $visitor->startSerializingObject($metadata, $object, TypeDefinition::fromArray($type), $context);
                 foreach ($metadata->propertyMetadata as $propertyMetadata) {
                     if (null !== $exclusionStrategy && $exclusionStrategy->shouldSkipProperty($propertyMetadata, $context)) {
                         continue;
@@ -182,12 +182,12 @@ final class SerializationGraphNavigator extends GraphNavigator implements GraphN
                     }
 
                     $context->pushPropertyMetadata($propertyMetadata);
-                    $visitor->visitProperty($propertyMetadata, $data, $context);
+                    $visitor->serializeProperty($propertyMetadata, $data, $context);
                     $context->popPropertyMetadata();
                 }
                 $this->afterVisitingObject($metadata, $data, $type, $context);
 
-                return $visitor->endVisitingObject($metadata, $data, $type, $context);
+                return $visitor->endSerializingObject($metadata, $data, TypeDefinition::fromArray($type), $context);
         }
     }
 

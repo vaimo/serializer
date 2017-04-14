@@ -102,6 +102,7 @@ use JMS\Serializer\Tests\Fixtures\Tag;
 use JMS\Serializer\Tests\Fixtures\Timestamp;
 use JMS\Serializer\Tests\Fixtures\Tree;
 use JMS\Serializer\Tests\Fixtures\VehicleInterfaceGarage;
+use JMS\Serializer\TypeDefinition;
 use JMS\Serializer\XmlDeserializationVisitor;
 use JMS\Serializer\XmlSerializationVisitor;
 use JMS\Serializer\YamlDeserializationVisitor;
@@ -1377,7 +1378,7 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
         $this->handlerRegistry->registerSubscribingHandler(new ArrayCollectionHandler());
         $this->handlerRegistry->registerHandler(GraphNavigator::DIRECTION_SERIALIZATION, 'AuthorList', $this->getFormat(),
             function (SerializationVisitorInterface $visitor, $object, array $type, Context $context) {
-                return $visitor->visitArray(iterator_to_array($object), $type, $context);
+                return $visitor->serializeArray(iterator_to_array($object), TypeDefinition::fromArray($type), $context);
             }
         );
         $this->handlerRegistry->registerHandler(GraphNavigator::DIRECTION_DESERIALIZATION, 'AuthorList', $this->getFormat(),
