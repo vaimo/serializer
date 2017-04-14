@@ -71,6 +71,7 @@ class VirtualPropertyMetadata extends PropertyMetadata
             $this->class,
             $this->name,
             'excludeIf' => $this->excludeIf,
+            'typeDefinition' => $this->excludeIf,
         ));
     }
 
@@ -104,6 +105,10 @@ class VirtualPropertyMetadata extends PropertyMetadata
 
         if (isset($unserialized['excludeIf'])) {
             $this->excludeIf = $unserialized['excludeIf'];
+        }
+
+        if (isset($unserialized['typeDefinition'])) {
+            $this->typeDefinition = $unserialized['typeDefinition'];
         }
     }
 }

@@ -24,12 +24,22 @@ use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\Metadata\ExpressionPropertyMetadata;
 use JMS\Serializer\Metadata\PropertyMetadata;
 use JMS\Serializer\Metadata\VirtualPropertyMetadata;
+use JMS\Serializer\TypeParser;
 use Metadata\Driver\AbstractFileDriver;
+use Metadata\Driver\FileLocatorInterface;
 use Metadata\MethodMetadata;
 use Symfony\Component\Yaml\Yaml;
 
 final class YamlDriver extends AbstractFileDriver
 {
+    private $typeParser;
+
+    public function __construct(FileLocatorInterface $locator, TypeParser $typeParser = null)
+    {
+        parent::__construct($locator);
+        $this->typeParser = $typeParser ?: new TypeParser();
+    }
+
     protected function loadMetadataFromFile(\ReflectionClass $class, $file)
     {
         $config = Yaml::parse(file_get_contents($file));
@@ -114,7 +124,7 @@ final class YamlDriver extends AbstractFileDriver
                     }
 
                     if (isset($pConfig['type'])) {
-                        $pMetadata->setType((string)$pConfig['type']);
+                        $pMetadata->setTypeDefinition($this->typeParser->parseAsDefinition((string)$pConfig['type']));
                     }
 
                     if (isset($pConfig['groups'])) {

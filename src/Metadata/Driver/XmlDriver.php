@@ -25,11 +25,21 @@ use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\Metadata\ExpressionPropertyMetadata;
 use JMS\Serializer\Metadata\PropertyMetadata;
 use JMS\Serializer\Metadata\VirtualPropertyMetadata;
+use JMS\Serializer\TypeParser;
 use Metadata\Driver\AbstractFileDriver;
+use Metadata\Driver\FileLocatorInterface;
 use Metadata\MethodMetadata;
 
 final class XmlDriver extends AbstractFileDriver
 {
+    private $typeParser;
+
+    public function __construct(FileLocatorInterface $locator, TypeParser $typeParser=null)
+    {
+        parent::__construct($locator);
+        $this->typeParser = $typeParser ?: new TypeParser();
+    }
+
     protected function loadMetadataFromFile(\ReflectionClass $class, $path)
     {
         $previous = libxml_use_internal_errors(true);
@@ -181,9 +191,9 @@ final class XmlDriver extends AbstractFileDriver
                     }
 
                     if (null !== $type = $pElem->attributes()->type) {
-                        $pMetadata->setType((string)$type);
+                        $pMetadata->setTypeDefinition($this->typeParser->parseAsDefinition((string)$type));
                     } elseif (isset($pElem->type)) {
-                        $pMetadata->setType((string)$pElem->type);
+                        $pMetadata->setTypeDefinition($this->typeParser->parseAsDefinition((string)$pElem->type));
                     }
 
                     if (null !== $groups = $pElem->attributes()->groups) {

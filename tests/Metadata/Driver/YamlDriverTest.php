@@ -67,7 +67,7 @@ class YamlDriverTest extends BaseDriverTest
         $m = $this->getDriverForSubDir('case')->loadMetadataForClass(new \ReflectionClass('JMS\Serializer\Tests\Fixtures\BlogPost'));
 
         $p = new PropertyMetadata($m->name, 'title');
-        $p->type = array('name' => 'string', 'params' => array());
+        $p->setType(array('name' => 'string', 'params' => array()));
         $this->assertEquals($p, $m->propertyMetadata['title']);
     }
 

@@ -21,6 +21,7 @@ namespace JMS\Serializer\Metadata\Driver;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata as DoctrineClassMetadata;
 use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\Metadata\PropertyMetadata;
+use JMS\Serializer\TypeDefinition;
 
 /**
  * This class decorates any other driver. If the inner driver does not provide a
@@ -44,7 +45,7 @@ final class DoctrineTypeDriver extends AbstractDoctrineTypeDriver
     {
         $propertyName = $propertyMetadata->name;
         if ($doctrineMetadata->hasField($propertyName) && $fieldType = $this->normalizeFieldType($doctrineMetadata->getTypeOfField($propertyName))) {
-            $propertyMetadata->setType($fieldType);
+            $propertyMetadata->setTypeDefinition(new TypeDefinition($fieldType));
         } elseif ($doctrineMetadata->hasAssociation($propertyName)) {
             $targetEntity = $doctrineMetadata->getAssociationTargetClass($propertyName);
 
@@ -60,10 +61,12 @@ final class DoctrineTypeDriver extends AbstractDoctrineTypeDriver
             }
 
             if (!$doctrineMetadata->isSingleValuedAssociation($propertyName)) {
-                $targetEntity = "ArrayCollection<{$targetEntity}>";
+                $propertyMetadata->setTypeDefinition(new TypeDefinition('ArrayCollection', [
+                    new TypeDefinition($targetEntity)
+                ]));
+            } else {
+                $propertyMetadata->setTypeDefinition(new TypeDefinition($targetEntity));
             }
-
-            $propertyMetadata->setType($targetEntity);
         }
     }
 }

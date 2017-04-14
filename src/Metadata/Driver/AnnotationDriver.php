@@ -54,16 +54,19 @@ use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\Metadata\ExpressionPropertyMetadata;
 use JMS\Serializer\Metadata\PropertyMetadata;
 use JMS\Serializer\Metadata\VirtualPropertyMetadata;
+use JMS\Serializer\TypeParser;
 use Metadata\Driver\DriverInterface;
 use Metadata\MethodMetadata;
 
 final class AnnotationDriver implements DriverInterface
 {
     private $reader;
+    protected $typeParser;
 
-    public function __construct(Reader $reader)
+    public function __construct(Reader $reader, TypeParser $typeParser=null)
     {
         $this->reader = $reader;
+        $this->typeParser = $typeParser ?: new TypeParser();
     }
 
     public function loadMetadataForClass(\ReflectionClass $class)
@@ -173,7 +176,7 @@ final class AnnotationDriver implements DriverInterface
                             $isExclude = true;
                         }
                     } elseif ($annot instanceof Type) {
-                        $propertyMetadata->setType($annot->name);
+                        $propertyMetadata->setTypeDefinition($this->typeParser->parseAsDefinition($annot->name));
                     } elseif ($annot instanceof XmlElement) {
                         $propertyMetadata->xmlAttribute = false;
                         $propertyMetadata->xmlElementCData = $annot->cdata;

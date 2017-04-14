@@ -103,13 +103,16 @@ class PropertyMetadata extends BasePropertyMetadata
         $obj->{$this->setter}($value);
     }
 
-    private $typeDefinition;
+    protected $typeDefinition;
 
     /**
      * @return TypeDefinition|null
      */
     public function getTypeDefinition()
     {
+        if ($this->typeDefinition !== null) {
+            return $this->typeDefinition;
+        }
         if ($this->type !== null){
             if ($this->typeDefinition === null) {
                 $this->typeDefinition = TypeDefinition::fromArray($this->type);
@@ -120,13 +123,30 @@ class PropertyMetadata extends BasePropertyMetadata
         return null;
     }
 
+    /**
+     * @deprecated
+     * @param  $type
+     */
     public function setType($type)
     {
+        if (is_array($type)) {
+            $this->type = $type;
+            $this->typeDefinition = TypeDefinition::fromArray($type);
+            return;
+        }
+        @trigger_error(__METHOD__ . " is deprecated and will be removed in 3.0", E_USER_DEPRECATED);
+
         if (null === self::$typeParser) {
             self::$typeParser = new TypeParser();
         }
-
         $this->type = self::$typeParser->parse($type);
+        $this->typeDefinition = TypeDefinition::fromArray($this->type);
+    }
+
+    public function setTypeDefinition(TypeDefinition $type)
+    {
+        $this->type = $type->getArray();
+        $this->typeDefinition = $type;
     }
 
     public function serialize()
@@ -156,6 +176,7 @@ class PropertyMetadata extends BasePropertyMetadata
             'xmlEntryNamespace' => $this->xmlEntryNamespace,
             'xmlCollectionSkipWhenEmpty' => $this->xmlCollectionSkipWhenEmpty,
             'excludeIf' => $this->excludeIf,
+            'typeDefinition' => $this->typeDefinition
         ));
     }
 
@@ -194,6 +215,10 @@ class PropertyMetadata extends BasePropertyMetadata
         }
         if (isset($unserialized['excludeIf'])) {
             $this->excludeIf = $unserialized['excludeIf'];
+        }
+
+        if (isset($unserialized['typeDefinition'])) {
+            $this->typeDefinition = $unserialized['typeDefinition'];
         }
 
         parent::unserialize($parentStr);

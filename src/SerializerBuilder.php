@@ -78,6 +78,7 @@ class SerializerBuilder
     private $driverFactory;
     private $serializationContextFactory;
     private $deserializationContextFactory;
+    private $typeParser;
 
     /**
      * @var ExpressionEvaluatorInterface
@@ -96,9 +97,10 @@ class SerializerBuilder
 
     public function __construct()
     {
+        $this->typeParser = new TypeParser();
         $this->handlerRegistry = new HandlerRegistry();
         $this->eventDispatcher = new EventDispatcher();
-        $this->driverFactory = new DefaultDriverFactory();
+        $this->driverFactory = new DefaultDriverFactory($this->typeParser);
         $this->serializationVisitors = new Map();
         $this->deserializationVisitors = new Map();
     }
@@ -453,7 +455,7 @@ class SerializerBuilder
             $this->serializationVisitors,
             $this->deserializationVisitors,
             $this->eventDispatcher,
-            null,
+            $this->typeParser,
             $this->expressionEvaluator
         );
 
