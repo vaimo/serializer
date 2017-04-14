@@ -27,6 +27,8 @@ use JMS\Serializer\Metadata\PropertyMetadata;
 
 class XmlDeserializationVisitor extends AbstractVisitor implements DeserializationVisitorInterface
 {
+    use DeserializationLegacyTrait;
+
     private $objectStack;
     private $metadataStack;
     private $objectMetadataStack;
@@ -41,7 +43,7 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
         $this->disableExternalEntities = false;
     }
 
-    public function setNavigator(GraphNavigatorInterface $navigator)
+    public function initialize(GraphNavigatorInterface $navigator):void
     {
         $this->navigator = $navigator;
         $this->objectStack = new \SplStack;
@@ -49,7 +51,7 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
         $this->objectMetadataStack = new \SplStack;
     }
 
-    public function prepare($data)
+    public function prepareData($data)
     {
         $data = $this->emptyStringToSpaceCharacter($data);
 
@@ -85,17 +87,16 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
         return $data === '' ? ' ' : $data;
     }
 
-    public function visitNull($data, array $type, Context $context)
+    public function deserializeNull($data, TypeDefinition $type, DeserializationContext $context):void
     {
-        return null;
     }
 
-    public function visitString($data, array $type, Context $context)
+    public function deserializeString($data, TypeDefinition $type, DeserializationContext $context):string
     {
         return (string)$data;
     }
 
-    public function visitBoolean($data, array $type, Context $context)
+    public function deserializeBoolean($data, TypeDefinition $type, DeserializationContext $context):bool
     {
         $data = (string)$data;
 
@@ -110,17 +111,17 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
         return $data;
     }
 
-    public function visitInteger($data, array $type, Context $context)
+    public function deserializeInteger($data, TypeDefinition $type, DeserializationContext $context):int
     {
         return (integer)$data;
     }
 
-    public function visitDouble($data, array $type, Context $context)
+    public function deserializeFloat($data, TypeDefinition $type, DeserializationContext $context):float
     {
         return (double)$data;
     }
 
-    public function visitArray($data, array $type, Context $context)
+    public function deserializeArray($data, TypeDefinition $type, DeserializationContext $context)
     {
         $entryName = null !== $this->currentMetadata && $this->currentMetadata->xmlEntryName ? $this->currentMetadata->xmlEntryName : 'entry';
         $namespace = null !== $this->currentMetadata && $this->currentMetadata->xmlEntryNamespace ? $this->currentMetadata->xmlEntryNamespace : null;
@@ -142,14 +143,14 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
             return array();
         }
 
-        switch (count($type['params'])) {
+        switch (count($type->getParams())) {
             case 0:
                 throw new RuntimeException(sprintf('The array type must be specified either as "array<T>", or "array<K,V>".'));
 
             case 1:
                 $result = array();
                 foreach ($nodes as $v) {
-                    $result[] = $this->navigator->accept($v, $type['params'][0], $context);
+                    $result[] = $this->navigator->accept($v, $type->getParam(0)->getArray(), $context);
                 }
 
                 return $result;
@@ -159,7 +160,7 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
                     throw new RuntimeException('Maps are not supported on top-level without metadata.');
                 }
 
-                list($keyType, $entryType) = $type['params'];
+                $entryType = $type->getParam(1);
                 $result = array();
 
                 $nodes = $data->children($namespace)->$entryName;
@@ -169,8 +170,7 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
                         throw new RuntimeException(sprintf('The key attribute "%s" must be set for each entry of the map.', $this->currentMetadata->xmlKeyAttribute));
                     }
 
-                    $k = $this->navigator->accept($attrs[$this->currentMetadata->xmlKeyAttribute], $keyType, $context);
-                    $result[$k] = $this->navigator->accept($v, $entryType, $context);
+                    $result[(string)$attrs[$this->currentMetadata->xmlKeyAttribute]] = $this->navigator->accept($v, $entryType->getArray(), $context);
                 }
 
                 return $result;
@@ -180,13 +180,13 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
         }
     }
 
-    public function startVisitingObject(ClassMetadata $metadata, $object, array $type, Context $context)
+    public function startDeserializingObject(ClassMetadata $metadata, $object, TypeDefinition $type, DeserializationContext $context):void
     {
         $this->setCurrentObject($object);
         $this->objectMetadataStack->push($metadata);
     }
 
-    public function visitProperty(PropertyMetadata $metadata, $data, Context $context)
+    public function deserializeProperty(PropertyMetadata $metadata, $data, DeserializationContext $context):void
     {
         $name = $this->namingStrategy->translateName($metadata);
 
@@ -253,7 +253,7 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
         $this->accessor->setValue($this->currentObject, $v, $metadata);
     }
 
-    public function endVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context)
+    public function endDeserializingObject(ClassMetadata $metadata, $data, TypeDefinition $type, DeserializationContext $context)
     {
         $rs = $this->currentObject;
         $this->objectMetadataStack->pop();
@@ -294,9 +294,12 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
         return $this->currentMetadata = $this->metadataStack->pop();
     }
 
+    /**
+     * @deprecated
+     */
     public function getResult()
     {
-        throw new RuntimeException(__METHOD__ . " has been deprecated for deserialization visitors");
+        throw new RuntimeException(__METHOD__ . " has been deprecated for deserialization deserializeors");
     }
 
     /**

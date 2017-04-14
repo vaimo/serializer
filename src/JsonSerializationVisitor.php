@@ -30,7 +30,6 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
     private $options = 0;
 
     private $navigator;
-    private $root;
     private $dataStack;
     private $data;
 
@@ -157,17 +156,16 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
         $this->data[$key] = $value;
     }
 
-    public function getRoot()
-    {
-        return $this->root;
-    }
-
     /**
      * @param mixed $data the passed data must be understood by whatever encoding function is applied later.
      * @return string
      */
     public function getSerializationResult($data)
     {
+        if ($data === null && $this->root !== null){
+            $data = $this->root;
+        }
+
         $result = @json_encode($data, $this->options);
 
         switch (json_last_error()) {
@@ -197,7 +195,30 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
      */
     public function getResult()
     {
+        trigger_error(__METHOD__ . " is deprecated and will be removed in 3.0", E_USER_DEPRECATED);
+
         return $this->getSerializationResult($this->root);
     }
 
+    /**
+     * @deprecated
+     */
+    private $root;
+    /**
+     * @deprecated
+     */
+    public function getRoot()
+    {
+        @trigger_error(__METHOD__ . " is deprecated and will be removed in 3.0", E_USER_DEPRECATED);
+        return $this->root;
+    }
+    /**
+     * @deprecated
+     */
+    public function setRoot($root)
+    {
+        @trigger_error(__METHOD__ . " is deprecated and will be removed in 3.0", E_USER_DEPRECATED);
+
+        $this->root = $root;
+    }
 }

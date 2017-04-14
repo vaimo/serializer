@@ -29,71 +29,72 @@ use JMS\Serializer\Metadata\PropertyMetadata;
  */
 class JsonDeserializationVisitor extends AbstractVisitor implements DeserializationVisitorInterface
 {
+    use DeserializationLegacyTrait;
+
     private $navigator;
     private $objectStack;
     private $currentObject;
 
-    public function setNavigator(GraphNavigatorInterface $navigator)
+    public function initialize(GraphNavigatorInterface $navigator):void
     {
         $this->navigator = $navigator;
         $this->objectStack = new \SplStack;
     }
 
-    public function visitNull($data, array $type, Context $context)
+    public function deserializeNull($data, TypeDefinition $type, DeserializationContext $context):void
     {
-        return null;
     }
 
-    public function visitString($data, array $type, Context $context)
+    public function deserializeString($data, TypeDefinition $type, DeserializationContext $context):string
     {
         return (string)$data;
     }
 
-    public function visitBoolean($data, array $type, Context $context)
+    public function deserializeBoolean($data, TypeDefinition $type, DeserializationContext $context):bool
     {
         return (Boolean)$data;
     }
 
-    public function visitInteger($data, array $type, Context $context)
+    public function deserializeInteger($data, TypeDefinition $type, DeserializationContext $context):int
     {
-        return (integer)$data;;
+        return (int)$data;
     }
 
-    public function visitDouble($data, array $type, Context $context)
+    public function deserializeFloat($data, TypeDefinition $type, DeserializationContext $context):float
     {
         return (double)$data;
     }
 
-    public function visitArray($data, array $type, Context $context)
+    public function deserializeArray($data, TypeDefinition $type, DeserializationContext $context)
     {
         if (!is_array($data)) {
             throw new RuntimeException(sprintf('Expected array, but got %s: %s', gettype($data), json_encode($data)));
         }
 
         // If no further parameters were given, keys/values are just passed as is.
-        if (!$type['params']) {
+        if (!$type->getParams()) {
             return $data;
         }
 
-        switch (count($type['params'])) {
+        switch (count($type->getParams())) {
             case 1: // Array is a list.
-                $listType = $type['params'][0];
+                $listType = $type->getParam(0);
 
                 $result = array();
 
                 foreach ($data as $v) {
-                    $result[] = $this->navigator->accept($v, $listType, $context);
+                    $result[] = $this->navigator->accept($v, $listType->getArray(), $context);
                 }
 
                 return $result;
 
             case 2: // Array is a map.
-                list($keyType, $entryType) = $type['params'];
+                $entryType = $type->getParam(1);
 
                 $result = array();
 
                 foreach ($data as $k => $v) {
-                    $result[$this->navigator->accept($k, $keyType, $context)] = $this->navigator->accept($v, $entryType, $context);
+                    $result[$k] = $this->navigator->accept($v, $entryType->getArray(), $context);
                 }
 
                 return $result;
@@ -103,12 +104,12 @@ class JsonDeserializationVisitor extends AbstractVisitor implements Deserializat
         }
     }
 
-    public function startVisitingObject(ClassMetadata $metadata, $object, array $type, Context $context)
+    public function startDeserializingObject(ClassMetadata $metadata, $object, TypeDefinition $type, DeserializationContext $context):void
     {
         $this->setCurrentObject($object);
     }
 
-    public function visitProperty(PropertyMetadata $metadata, $data, Context $context)
+    public function deserializeProperty(PropertyMetadata $metadata, $data, DeserializationContext $context):void
     {
         $name = $this->namingStrategy->translateName($metadata);
 
@@ -134,17 +135,12 @@ class JsonDeserializationVisitor extends AbstractVisitor implements Deserializat
 
     }
 
-    public function endVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context)
+    public function endDeserializingObject(ClassMetadata $metadata, $data, TypeDefinition $type, DeserializationContext $context)
     {
         $obj = $this->currentObject;
         $this->revertCurrentObject();
 
         return $obj;
-    }
-
-    public function getResult()
-    {
-        throw new RuntimeException(__METHOD__ . " has been deprecated for deserialization visitors");
     }
 
     public function setCurrentObject($object)
@@ -163,7 +159,7 @@ class JsonDeserializationVisitor extends AbstractVisitor implements Deserializat
         return $this->currentObject = $this->objectStack->pop();
     }
 
-    public function prepare($str)
+    public function prepareData($str)
     {
         $decoded = json_decode($str, true);
 

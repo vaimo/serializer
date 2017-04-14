@@ -23,7 +23,7 @@ use JMS\Serializer\Metadata\PropertyMetadata;
 use JMS\Serializer\Util\ArrayObject;
 
 /**
- * Interface for visitors.
+ * Interface for deserializing visitors.
  *
  * This contains the minimal set of values that must be supported for any
  * output format.
@@ -33,80 +33,80 @@ use JMS\Serializer\Util\ArrayObject;
 interface DeserializationVisitorInterface
 {
     /**
-     * Allows visitors to convert the input data to a different representation
+     * Allows to convert the input data to a different representation
      * before the actual deserialization process starts.
      *
      * @param mixed $data
      *
      * @return mixed
      */
-    public function prepare($data);
+    public function prepareData($data);
 
     /**
      * @param mixed $data
-     * @param array $type
-     * @param DeserializationContext $context
-     *
-     * @return null
-     */
-    public function visitNull($data, array $type, Context $context);
-
-    /**
-     * @param mixed $data
-     * @param array $type
-     * @param DeserializationContext $context
-     *
-     * @return string
-     */
-    public function visitString($data, array $type, Context $context);
-
-    /**
-     * @param mixed $data
-     * @param array $type
-     * @param DeserializationContext $context
-     *
-     * @return boolean
-     */
-    public function visitBoolean($data, array $type, Context $context);
-
-    /**
-     * @param mixed $data
-     * @param array $type
-     * @param DeserializationContext $context
-     *
-     * @return double
-     */
-    public function visitDouble($data, array $type, Context $context);
-
-    /**
-     * @param mixed $data
-     * @param array $type
-     * @param DeserializationContext $context
-     *
-     * @return integer
-     */
-    public function visitInteger($data, array $type, Context $context);
-
-    /**
-     * @param mixed $data
-     * @param array $type
-     * @param DeserializationContext $context
-     *
-     * @return array|ArrayObject
-     */
-    public function visitArray($data, array $type, Context $context);
-
-    /**
-     * Called before the properties of the object are being visited.
-     *
-     * @param ClassMetadata $metadata
-     * @param mixed $data
-     * @param array $type
+     * @param TypeDefinition $type
      * @param DeserializationContext $context
      *
      * @return void
      */
-    public function startVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context);
+    public function deserializeNull($data, TypeDefinition $type, DeserializationContext $context):void;
+
+    /**
+     * @param mixed $data
+     * @param TypeDefinition $type
+     * @param DeserializationContext $context
+     *
+     * @return string
+     */
+    public function deserializeString($data, TypeDefinition $type, DeserializationContext $context):string;
+
+    /**
+     * @param mixed $data
+     * @param TypeDefinition $type
+     * @param DeserializationContext $context
+     *
+     * @return boolean
+     */
+    public function deserializeBoolean($data, TypeDefinition $type, DeserializationContext $context):bool;
+
+    /**
+     * @param mixed $data
+     * @param TypeDefinition $type
+     * @param DeserializationContext $context
+     *
+     * @return float
+     */
+    public function deserializeFloat($data, TypeDefinition $type, DeserializationContext $context):float;
+
+    /**
+     * @param mixed $data
+     * @param TypeDefinition $type
+     * @param DeserializationContext $context
+     *
+     * @return integer
+     */
+    public function deserializeInteger($data, TypeDefinition $type, DeserializationContext $context):int;
+
+    /**
+     * @param mixed $data
+     * @param TypeDefinition $type
+     * @param DeserializationContext $context
+     *
+     * @return array|ArrayObject
+     */
+    public function deserializeArray($data, TypeDefinition $type, DeserializationContext $context);
+
+    /**
+     * Called before the properties of the object are being deserializeed.
+     *
+     * @param ClassMetadata $metadata
+     * @param mixed $data
+     * @param TypeDefinition $type
+     * @param DeserializationContext $context
+     *
+     * @return void
+     */
+    public function startDeserializingObject(ClassMetadata $metadata, $data, TypeDefinition $type, DeserializationContext $context):void;
 
     /**
      * @param PropertyMetadata $metadata
@@ -115,19 +115,19 @@ interface DeserializationVisitorInterface
      *
      * @return void
      */
-    public function visitProperty(PropertyMetadata $metadata, $data, Context $context);
+    public function deserializeProperty(PropertyMetadata $metadata, $data, DeserializationContext $context):void;
 
     /**
-     * Called after all properties of the object have been visited.
+     * Called after all properties of the object have been deserializeed.
      *
      * @param ClassMetadata $metadata
      * @param mixed $data
-     * @param array $type
+     * @param TypeDefinition $type
      * @param DeserializationContext $context
      *
-     * @return ArrayObject
+     * @return object
      */
-    public function endVisitingObject(ClassMetadata $metadata, $data, array $type, Context $context);
+    public function endDeserializingObject(ClassMetadata $metadata, $data, TypeDefinition $type, DeserializationContext $context);
 
     /**
      * Called before serialization/deserialization starts.
@@ -136,5 +136,5 @@ interface DeserializationVisitorInterface
      *
      * @return void
      */
-    public function setNavigator(GraphNavigatorInterface $navigator);
+    public function initialize(GraphNavigatorInterface $navigator):void;
 }

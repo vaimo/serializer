@@ -17,6 +17,7 @@
  */
 
 namespace JMS\Serializer;
+use JMS\Serializer\Exception\RuntimeException;
 
 /**
  * @author Asmir Mustafic <goetas@gmail.com>
@@ -59,14 +60,23 @@ final class TypeDefinition
         return isset($this->params[$index]);
     }
 
+    /**
+     * @param $index
+     * @return string|TypeDefinition|null
+     */
     public function getParam($index)
     {
+        if (!isset($this->params[$index])) {
+            throw new RuntimeException("No param $index");
+        }
         return $this->params[$index];
     }
 
+    /**
+     * @return array|null
+     */
     public function getArray()
     {
-
         if ($this->name === 'UNKNOWN') {
             return null;
         }
