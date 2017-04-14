@@ -101,8 +101,8 @@ class SerializerBuilder
         $this->handlerRegistry = new HandlerRegistry();
         $this->eventDispatcher = new EventDispatcher();
         $this->driverFactory = new DefaultDriverFactory($this->typeParser);
-        $this->serializationVisitors = new Map();
-        $this->deserializationVisitors = new Map();
+        $this->serializationVisitors = array();
+        $this->deserializationVisitors = array();
     }
 
     public function setAccessorStrategy(AccessorStrategyInterface $accessorStrategy)
@@ -206,7 +206,7 @@ class SerializerBuilder
     public function setSerializationVisitor($format, SerializationVisitorInterface $visitor)
     {
         $this->visitorsAdded = true;
-        $this->serializationVisitors->set($format, $visitor);
+        $this->serializationVisitors[$format] = $visitor;
 
         return $this;
     }
@@ -214,7 +214,7 @@ class SerializerBuilder
     public function setDeserializationVisitor($format, DeserializationVisitorInterface $visitor)
     {
         $this->visitorsAdded = true;
-        $this->deserializationVisitors->set($format, $visitor);
+        $this->deserializationVisitors[$format] = $visitor;
 
         return $this;
     }
@@ -224,11 +224,11 @@ class SerializerBuilder
         $this->initializePropertyNamingStrategy();
 
         $this->visitorsAdded = true;
-        $this->serializationVisitors->setAll(array(
+        $this->serializationVisitors = array(
             'xml' => new XmlSerializationVisitor($this->propertyNamingStrategy, $this->getAccessorStrategy()),
             'yml' => new YamlSerializationVisitor($this->propertyNamingStrategy, $this->getAccessorStrategy()),
             'json' => new JsonSerializationVisitor($this->propertyNamingStrategy, $this->getAccessorStrategy()),
-        ));
+        );
 
         return $this;
     }
@@ -238,10 +238,10 @@ class SerializerBuilder
         $this->initializePropertyNamingStrategy();
 
         $this->visitorsAdded = true;
-        $this->deserializationVisitors->setAll(array(
+        $this->deserializationVisitors = array(
             'xml' => new XmlDeserializationVisitor($this->propertyNamingStrategy),
             'json' => new JsonDeserializationVisitor($this->propertyNamingStrategy),
-        ));
+        );
 
         return $this;
     }

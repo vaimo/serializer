@@ -735,11 +735,11 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
         $evaluator = new ExpressionEvaluator(new ExpressionLanguage());
         $accessor = new ExpressionAccessorStrategy($evaluator, new DefaultAccessorStrategy());
 
-        $this->serializationVisitors = new Map(array(
+        $this->serializationVisitors = array(
             'json' => new JsonSerializationVisitor($namingStrategy, $accessor),
             'xml' => new XmlSerializationVisitor($namingStrategy, $accessor),
             'yml' => new YamlSerializationVisitor($namingStrategy, $accessor),
-        ));
+        );
 
         $serializer = new Serializer($this->factory, $this->handlerRegistry, $this->objectConstructor, $this->serializationVisitors, $this->deserializationVisitors, $this->dispatcher, null, $evaluator);
 
@@ -1403,16 +1403,16 @@ abstract class BaseSerializationTest extends \PHPUnit\Framework\TestCase
 
         $namingStrategy = new SerializedNameAnnotationStrategy(new CamelCaseNamingStrategy());
         $this->objectConstructor = new UnserializeObjectConstructor();
-        $this->serializationVisitors = new Map(array(
+        $this->serializationVisitors = array(
             'json' => new JsonSerializationVisitor($namingStrategy),
             'xml' => new XmlSerializationVisitor($namingStrategy),
             'yml' => new YamlSerializationVisitor($namingStrategy),
-        ));
-        $this->deserializationVisitors = new Map(array(
+        );
+        $this->deserializationVisitors = array(
             'json' => new JsonDeserializationVisitor($namingStrategy),
             'xml' => new XmlDeserializationVisitor($namingStrategy),
             'yml' => new YamlDeserializationVisitor($namingStrategy),
-        ));
+        );
 
         $this->serializer = new Serializer($this->factory, $this->handlerRegistry, $this->objectConstructor, $this->serializationVisitors, $this->deserializationVisitors, $this->dispatcher);
     }

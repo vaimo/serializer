@@ -46,8 +46,8 @@ class ArrayTest extends \PHPUnit\Framework\TestCase
             new MetadataFactory(new AnnotationDriver(new AnnotationReader())),
             new HandlerRegistry(),
             new UnserializeObjectConstructor(),
-            new Map(array('json' => new JsonSerializationVisitor($namingStrategy))),
-            new Map(array('json' => new JsonDeserializationVisitor($namingStrategy)))
+            array('json' => new JsonSerializationVisitor($namingStrategy)),
+            array('json' => new JsonDeserializationVisitor($namingStrategy))
         );
     }
 
