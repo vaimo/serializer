@@ -25,7 +25,7 @@ use JMS\Serializer\Util\ArrayObject;
 
 class JsonSerializationVisitor extends AbstractVisitor implements SerializationVisitorInterface
 {
-    use LegacyTrait;
+    use SerializationLegacyTrait;
 
     private $options = 0;
 

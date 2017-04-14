@@ -33,7 +33,7 @@ use Symfony\Component\Yaml\Inline;
  */
 class YamlSerializationVisitor extends AbstractVisitor implements SerializationVisitorInterface
 {
-    use LegacyTrait;
+    use SerializationLegacyTrait;
     public $writer;
 
     private $navigator;

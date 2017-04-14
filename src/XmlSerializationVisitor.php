@@ -31,7 +31,7 @@ use JMS\Serializer\Naming\PropertyNamingStrategyInterface;
  */
 class XmlSerializationVisitor extends AbstractVisitor implements SerializationVisitorInterface
 {
-    use LegacyTrait;
+    use SerializationLegacyTrait;
     /**
      * @var \DOMDocument
      */
