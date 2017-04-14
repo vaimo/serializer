@@ -18,19 +18,23 @@
 
 namespace JMS\Serializer\Tests\Fixtures;
 
-use JMS\Serializer\Construction\ObjectConstructorInterface;
+use JMS\Serializer\Construction\LegacyObjectConstructorTrait;
+use JMS\Serializer\Construction\ObjectInstantiatorInterface;
 use JMS\Serializer\Construction\UnserializeObjectConstructor;
 use JMS\Serializer\DeserializationContext;
+use JMS\Serializer\DeserializationVisitorInterface;
 use JMS\Serializer\Metadata\ClassMetadata;
-use JMS\Serializer\VisitorInterface;
+use JMS\Serializer\TypeDefinition;
 
-class InitializedBlogPostConstructor implements ObjectConstructorInterface
+class InitializedBlogPostConstructor implements ObjectInstantiatorInterface
 {
-    public function construct(VisitorInterface $visitor, ClassMetadata $metadata, $data, array $type, DeserializationContext $context)
+    use LegacyObjectConstructorTrait;
+
+    public function instantiate(DeserializationVisitorInterface $visitor, ClassMetadata $metadata, $data, TypeDefinition $type, DeserializationContext $context)
     {
-        $constructor = new UnserializeObjectConstructor();
-        if ($type['name'] !== 'JMS\Serializer\Tests\Fixtures\BlogPost') {
-            return $constructor->construct($visitor, $metadata, $data, $type);
+        if ($type->getName() !== 'JMS\Serializer\Tests\Fixtures\BlogPost') {
+            $constructor = new UnserializeObjectConstructor();
+            return $constructor->instantiate($visitor, $metadata, $data, $type);
         }
 
         return new BlogPost('This is a nice title.', new Author('Foo Bar'), new \DateTime('2011-07-30 00:00', new \DateTimeZone('UTC')), new Publisher('Bar Foo'));

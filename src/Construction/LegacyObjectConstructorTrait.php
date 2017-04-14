@@ -18,31 +18,17 @@
 
 namespace JMS\Serializer\Construction;
 
+use Doctrine\Common\Persistence\ManagerRegistry;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\Metadata\ClassMetadata;
+use JMS\Serializer\TypeDefinition;
 use JMS\Serializer\VisitorInterface;
 
-/**
- * Implementations of this interface construct new objects during deserialization.
- * @deprecated
- * @author Johannes M. Schmitt <schmittjoh@gmail.com>
- */
-interface ObjectConstructorInterface
+trait LegacyObjectConstructorTrait
 {
-    /**
-     * @deprecated
-     * Constructs a new object.
-     *
-     * Implementations could for example create a new object calling "new", use
-     * "unserialize" techniques, reflection, or other means.
-     *
-     * @param VisitorInterface $visitor
-     * @param ClassMetadata $metadata
-     * @param mixed $data
-     * @param array $type ["name" => string, "params" => array]
-     * @param DeserializationContext $context
-     *
-     * @return object
-     */
-    public function construct(VisitorInterface $visitor, ClassMetadata $metadata, $data, array $type, DeserializationContext $context);
+    public function construct(VisitorInterface $visitor, ClassMetadata $metadata, $data, array $type, DeserializationContext $context)
+    {
+        @trigger_error(__METHOD__ . " is deprecated and will be removed in 3.0", E_USER_DEPRECATED);
+        return $this->instantiate($visitor, $metadata, $data, TypeDefinition::fromArray($type), $context);
+    }
 }

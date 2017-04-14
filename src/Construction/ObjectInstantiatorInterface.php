@@ -19,30 +19,31 @@
 namespace JMS\Serializer\Construction;
 
 use JMS\Serializer\DeserializationContext;
+use JMS\Serializer\DeserializationVisitorInterface;
 use JMS\Serializer\Metadata\ClassMetadata;
+use JMS\Serializer\TypeDefinition;
 use JMS\Serializer\VisitorInterface;
 
 /**
  * Implementations of this interface construct new objects during deserialization.
- * @deprecated
- * @author Johannes M. Schmitt <schmittjoh@gmail.com>
+ *
+ * @author Asmir Mustafic <goetas@gmail.com>
  */
-interface ObjectConstructorInterface
+interface ObjectInstantiatorInterface extends ObjectConstructorInterface
 {
     /**
-     * @deprecated
      * Constructs a new object.
      *
      * Implementations could for example create a new object calling "new", use
      * "unserialize" techniques, reflection, or other means.
      *
-     * @param VisitorInterface $visitor
+     * @param DeserializationVisitorInterface $visitor
      * @param ClassMetadata $metadata
      * @param mixed $data
-     * @param array $type ["name" => string, "params" => array]
+     * @param TypeDefinition $type
      * @param DeserializationContext $context
      *
      * @return object
      */
-    public function construct(VisitorInterface $visitor, ClassMetadata $metadata, $data, array $type, DeserializationContext $context);
+    public function instantiate(DeserializationVisitorInterface $visitor, ClassMetadata $metadata, $data, TypeDefinition $type, DeserializationContext $context);
 }

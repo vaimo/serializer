@@ -33,6 +33,9 @@ use Metadata\MetadataFactoryInterface;
  */
 abstract class GraphNavigator implements GraphNavigatorInterface
 {
+    const DIRECTION_SERIALIZATION = 1;
+    const DIRECTION_DESERIALIZATION = 2;
+
     protected $dispatcher;
     protected $metadataFactory;
     protected $handlerRegistry;
@@ -67,5 +70,11 @@ abstract class GraphNavigator implements GraphNavigatorInterface
         $this->dispatcher = $dispatcher;
         $this->metadataFactory = $metadataFactory;
         $this->handlerRegistry = $handlerRegistry;
+    }
+
+    public function accept($data, array $type = null, Context $context)
+    {
+        @trigger_error(__METHOD__ . " is deprecated and will be removed in 3.0", E_USER_DEPRECATED);
+        return $this->acceptData($data, $type?TypeDefinition::fromArray($type):null, $context);
     }
 }

@@ -19,6 +19,7 @@
 namespace JMS\Serializer;
 
 use JMS\Serializer\Construction\ObjectConstructorInterface;
+use JMS\Serializer\Construction\ObjectInstantiatorInterface;
 use JMS\Serializer\EventDispatcher\EventDispatcherInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\EventDispatcher\PreDeserializeEvent;
@@ -59,17 +60,20 @@ final class DeserializationGraphNavigator extends GraphNavigator implements Grap
      * Called for each node of the graph that is being traversed.
      *
      * @param mixed $data the data depends on the direction, and type of visitor
-     * @param null|array $type array has the format ["name" => string, "params" => array]
+     * @param null|TypeDefinition $type
      * @param Context $context
      * @return mixed the return value depends on the direction, and type of visitor
      */
-    public function accept($data, array $type = null, Context $context)
+    public function acceptData($data, TypeDefinition $type = null, Context $context)
     {
+        /**
+         * @var $visitor DeserializationVisitorInterface
+         */
         $visitor = $context->getVisitor();
 
         // If the type was not given, we infer the most specific type from the
         // input data in serialization mode.
-        if (null === $type) {
+        if (null === $type || $type->isUnknown()) {
             throw new RuntimeException('The type must be given for all properties when deserializing.');
 
             $typeName = gettype($data);
@@ -77,29 +81,29 @@ final class DeserializationGraphNavigator extends GraphNavigator implements Grap
                 $typeName = get_class($data);
             }
 
-            $type = array('name' => $typeName, 'params' => array());
+            $type = new TypeDefinition($typeName);
         }
 
-        switch ($type['name']) {
+        switch ($type->getName()) {
             case 'NULL':
-                return $visitor->visitNull($data, $type, $context);
+                return null;
 
             case 'string':
-                return $visitor->visitString($data, $type, $context);
+                return $visitor->deserializeString($data, $type, $context);
 
             case 'int':
             case 'integer':
-                return $visitor->visitInteger($data, $type, $context);
+                return $visitor->deserializeInteger($data, $type, $context);
 
             case 'boolean':
-                return $visitor->visitBoolean($data, $type, $context);
+                return $visitor->deserializeBoolean($data, $type, $context);
 
             case 'double':
             case 'float':
-                return $visitor->visitDouble($data, $type, $context);
+                return $visitor->deserializeFloat($data, $type, $context);
 
             case 'array':
-                return $visitor->visitArray($data, $type, $context);
+                return $visitor->deserializeArray($data, $type, $context);
 
             case 'resource':
                 throw new RuntimeException('Resources are not supported in serialized data.');
@@ -113,17 +117,17 @@ final class DeserializationGraphNavigator extends GraphNavigator implements Grap
                 // Trigger pre-serialization callbacks, and listeners if they exist.
                 // Dispatch pre-serialization event before handling data to have ability change type in listener
 
-                if (null !== $this->dispatcher && $this->dispatcher->hasListeners('serializer.pre_deserialize', $type['name'], $context->getFormat())) {
-                    $this->dispatcher->dispatch('serializer.pre_deserialize', $type['name'], $context->getFormat(), $event = new PreDeserializeEvent($context, $data, $type));
-                    $type = $event->getType();
+                if (null !== $this->dispatcher && $this->dispatcher->hasListeners('serializer.pre_deserialize', $type->getName(), $context->getFormat())) {
+                    $this->dispatcher->dispatch('serializer.pre_deserialize', $type->getName(), $context->getFormat(), $event = new PreDeserializeEvent($context, $data, $type));
+                    $type = TypeDefinition::fromArray($event->getType());
                     $data = $event->getData();
                 }
 
                 // First, try whether a custom handler exists for the given type. This is done
                 // before loading metadata because the type name might not be a class, but
                 // could also simply be an artifical type.
-                if (null !== $handler = $this->handlerRegistry->getHandler($context->getDirection(), $type['name'], $context->getFormat())) {
-                    $rs = call_user_func($handler, $visitor, $data, $type, $context);
+                if (null !== $handler = $this->handlerRegistry->getHandler($context->getDirection(), $type->getName(), $context->getFormat())) {
+                    $rs = call_user_func($handler, $visitor, $data, $type->getArray(), $context);
                     $context->decreaseDepth();
                     return $rs;
                 }
@@ -131,13 +135,13 @@ final class DeserializationGraphNavigator extends GraphNavigator implements Grap
                 $exclusionStrategy = $context->getExclusionStrategy();
 
                 /** @var $metadata ClassMetadata */
-                $metadata = $this->metadataFactory->getMetadataForClass($type['name']);
+                $metadata = $this->metadataFactory->getMetadataForClass($type->getName());
 
                 if ($metadata->usingExpression) {
                     throw new ExpressionLanguageRequiredException("To use conditional exclude/expose in {$metadata->name} you must configure the expression language.");
                 }
 
-                if (!empty($metadata->discriminatorMap) && $type['name'] === $metadata->discriminatorBaseClass) {
+                if (!empty($metadata->discriminatorMap) && $type->getName() === $metadata->discriminatorBaseClass) {
                     $metadata = $this->resolveMetadata($data, $metadata);
                 }
 
@@ -149,9 +153,14 @@ final class DeserializationGraphNavigator extends GraphNavigator implements Grap
 
                 $context->pushClassMetadata($metadata);
 
-                $object = $this->objectConstructor->construct($visitor, $metadata, $data, $type, $context);
+                if ($this->objectConstructor instanceof ObjectInstantiatorInterface) {
+                    $object = $this->objectConstructor->instantiate($visitor, $metadata, $data, $type, $context);
+                } else {
+                    $object = $this->objectConstructor->construct($visitor, $metadata, $data, $type->getArray(), $context);
+                }
 
-                $visitor->startVisitingObject($metadata, $object, $type, $context);
+
+                $visitor->startDeserializingObject($metadata, $object, $type, $context);
                 foreach ($metadata->propertyMetadata as $propertyMetadata) {
                     if (null !== $exclusionStrategy && $exclusionStrategy->shouldSkipProperty($propertyMetadata, $context)) {
                         continue;
@@ -162,12 +171,12 @@ final class DeserializationGraphNavigator extends GraphNavigator implements Grap
                     }
 
                     $context->pushPropertyMetadata($propertyMetadata);
-                    $visitor->visitProperty($propertyMetadata, $data, $context);
+                    $visitor->deserializeProperty($propertyMetadata, $data, $context);
                     $context->popPropertyMetadata();
                 }
 
-                $rs = $visitor->endVisitingObject($metadata, $data, $type, $context);
-                $this->afterVisitingObject($metadata, $rs, $type, $context);
+                $rs = $visitor->endDeserializingObject($metadata, $data, $type, $context);
+                $this->afterDeserializingObject($metadata, $rs, $type, $context);
 
                 return $rs;
         }
@@ -209,7 +218,7 @@ final class DeserializationGraphNavigator extends GraphNavigator implements Grap
         return $this->metadataFactory->getMetadataForClass($metadata->discriminatorMap[$typeValue]);
     }
 
-    private function afterVisitingObject(ClassMetadata $metadata, $object, array $type, Context $context)
+    private function afterDeserializingObject(ClassMetadata $metadata, $object, TypeDefinition $type, Context $context)
     {
         $context->decreaseDepth();
         $context->popClassMetadata();
@@ -219,7 +228,7 @@ final class DeserializationGraphNavigator extends GraphNavigator implements Grap
         }
 
         if (null !== $this->dispatcher && $this->dispatcher->hasListeners('serializer.post_deserialize', $metadata->name, $context->getFormat())) {
-            $this->dispatcher->dispatch('serializer.post_deserialize', $metadata->name, $context->getFormat(), new ObjectEvent($context, $object, $type));
+            $this->dispatcher->dispatch('serializer.post_deserialize', $metadata->name, $context->getFormat(), new ObjectEvent($context, $object, $type->getArray()));
         }
     }
 }

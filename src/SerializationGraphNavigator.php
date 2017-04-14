@@ -61,51 +61,51 @@ final class SerializationGraphNavigator extends GraphNavigator implements GraphN
      * Called for each node of the graph that is being traversed.
      *
      * @param mixed $data the data depends on the direction, and type of visitor
-     * @param null|array $type array has the format ["name" => string, "params" => array]
+     * @param null|TypeDefinition $type
      * @param Context $context
      * @return mixed the return value depends on the direction, and type of visitor
      */
-    public function accept($data, array $type = null, Context $context)
+    public function acceptData($data, TypeDefinition $type = null, Context $context)
     {
         $visitor = $context->getVisitor();
 
         // If the type was not given, we infer the most specific type from the
         // input data in serialization mode.
-        if (null === $type) {
+        if (null === $type || $type->isUnknown()) {
 
             $typeName = gettype($data);
             if ('object' === $typeName) {
                 $typeName = get_class($data);
             }
 
-            $type = array('name' => $typeName, 'params' => array());
+            $type = new TypeDefinition($typeName);
         }
         // If the data is null, we have to force the type to null regardless of the input in order to
         // guarantee correct handling of null values, and not have any internal auto-casting behavior.
         else if (null === $data) {
-            $type = array('name' => 'NULL', 'params' => array());
+            $type = new TypeDefinition("NULL");
         }
 
-        switch ($type['name']) {
+        switch ($type->getName()) {
             case 'NULL':
-                return $visitor->serializeNull(TypeDefinition::fromArray($type), $context);
+                return $visitor->serializeNull($type, $context);
 
             case 'string':
-                return $visitor->serializeString($data, TypeDefinition::fromArray($type), $context);
+                return $visitor->serializeString($data, $type, $context);
 
             case 'int':
             case 'integer':
-                return $visitor->serializeInteger($data, TypeDefinition::fromArray($type), $context);
+                return $visitor->serializeInteger($data, $type, $context);
 
             case 'boolean':
-                return $visitor->serializeBoolean($data, TypeDefinition::fromArray($type), $context);
+                return $visitor->serializeBoolean($data, $type, $context);
 
             case 'double':
             case 'float':
-                return $visitor->serializeFloat($data, TypeDefinition::fromArray($type), $context);
+                return $visitor->serializeFloat($data, $type, $context);
 
             case 'array':
-                return $visitor->serializeArray($data, TypeDefinition::fromArray($type), $context);
+                return $visitor->serializeArray($data, $type, $context);
 
             case 'resource':
                 $msg = 'Resources are not supported in serialized data.';
@@ -127,24 +127,24 @@ final class SerializationGraphNavigator extends GraphNavigator implements GraphN
 
                 // If we're serializing a polymorphic type, then we'll be interested in the
                 // metadata for the actual type of the object, not the base class.
-                if (class_exists($type['name'], false) || interface_exists($type['name'], false)) {
-                    if (is_subclass_of($data, $type['name'], false)) {
-                        $type = array('name' => get_class($data), 'params' => array());
+                if (class_exists($type->getName(), false) || interface_exists($type->getName(), false)) {
+                    if (is_subclass_of($data, $type->getName(), false)) {
+                        $type = new TypeDefinition(get_class($data));
                     }
                 }
 
                 // Trigger pre-serialization callbacks, and listeners if they exist.
                 // Dispatch pre-serialization event before handling data to have ability change type in listener
-                if ($this->dispatcher->hasListeners('serializer.pre_serialize', $type['name'], $context->getFormat())) {
-                    $this->dispatcher->dispatch('serializer.pre_serialize', $type['name'], $context->getFormat(), $event = new PreSerializeEvent($context, $data, $type));
-                    $type = $event->getType();
+                if ($this->dispatcher->hasListeners('serializer.pre_serialize', $type->getName(), $context->getFormat())) {
+                    $this->dispatcher->dispatch('serializer.pre_serialize', $type->getName(), $context->getFormat(), $event = new PreSerializeEvent($context, $data, $type->getArray()));
+                    $type = TypeDefinition::fromArray($event->getType());
                 }
 
                 // First, try whether a custom handler exists for the given type. This is done
                 // before loading metadata because the type name might not be a class, but
                 // could also simply be an artifical type.
-                if (null !== $handler = $this->handlerRegistry->getHandler($context->getDirection(), $type['name'], $context->getFormat())) {
-                    $rs = call_user_func($handler, $visitor, $data, $type, $context);
+                if (null !== $handler = $this->handlerRegistry->getHandler($context->getDirection(), $type->getName(), $context->getFormat())) {
+                    $rs = call_user_func($handler, $visitor, $data, $type->getArray(), $context);
                     $context->stopVisiting($data);
                     return $rs;
                 }
@@ -152,7 +152,7 @@ final class SerializationGraphNavigator extends GraphNavigator implements GraphN
                 $exclusionStrategy = $context->getExclusionStrategy();
 
                 /** @var $metadata ClassMetadata */
-                $metadata = $this->metadataFactory->getMetadataForClass($type['name']);
+                $metadata = $this->metadataFactory->getMetadataForClass($type->getName());
 
                 if ($metadata->usingExpression && !$this->expressionExclusionStrategy) {
                     throw new ExpressionLanguageRequiredException("To use conditional exclude/expose in {$metadata->name} you must configure the expression language.");
@@ -171,7 +171,7 @@ final class SerializationGraphNavigator extends GraphNavigator implements GraphN
                 }
                 $object = $data;
 
-                $visitor->startSerializingObject($metadata, $object, TypeDefinition::fromArray($type), $context);
+                $visitor->startSerializingObject($metadata, $object, $type, $context);
                 foreach ($metadata->propertyMetadata as $propertyMetadata) {
                     if (null !== $exclusionStrategy && $exclusionStrategy->shouldSkipProperty($propertyMetadata, $context)) {
                         continue;
@@ -187,11 +187,11 @@ final class SerializationGraphNavigator extends GraphNavigator implements GraphN
                 }
                 $this->afterVisitingObject($metadata, $data, $type, $context);
 
-                return $visitor->endSerializingObject($metadata, $data, TypeDefinition::fromArray($type), $context);
+                return $visitor->endSerializingObject($metadata, $data, $type, $context);
         }
     }
 
-    private function afterVisitingObject(ClassMetadata $metadata, $object, array $type, Context $context)
+    private function afterVisitingObject(ClassMetadata $metadata, $object, TypeDefinition $type, Context $context)
     {
         $context->stopVisiting($object);
         $context->popClassMetadata();
@@ -201,7 +201,7 @@ final class SerializationGraphNavigator extends GraphNavigator implements GraphN
         }
 
         if ($this->dispatcher->hasListeners('serializer.post_serialize', $metadata->name, $context->getFormat())) {
-            $this->dispatcher->dispatch('serializer.post_serialize', $metadata->name, $context->getFormat(), new ObjectEvent($context, $object, $type));
+            $this->dispatcher->dispatch('serializer.post_serialize', $metadata->name, $context->getFormat(), new ObjectEvent($context, $object, $type->getArray()));
         }
     }
 }

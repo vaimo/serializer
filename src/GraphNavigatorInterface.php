@@ -26,17 +26,14 @@ namespace JMS\Serializer;
  */
 interface GraphNavigatorInterface
 {
-    const DIRECTION_SERIALIZATION = 1;
-    const DIRECTION_DESERIALIZATION = 2;
-
     /**
      * Called for each node of the graph that is being traversed.
      *
      * @param mixed $data the data depends on the direction, and type of visitor
-     * @param null|array $type array has the format ["name" => string, "params" => array]
+     * @param null|TypeDefinition $type
      * @param Context $context
      *
      * @return mixed the return value depends on the direction, and type of visitor
      */
-    public function accept($data, array $type = null, Context $context);
+    public function acceptData($data, TypeDefinition $type = null, Context $context);
 }

@@ -22,6 +22,7 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use JMS\Serializer\Construction\UnserializeObjectConstructor;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\DeserializationGraphNavigator;
+use JMS\Serializer\DeserializationVisitorInterface;
 use JMS\Serializer\EventDispatcher\EventDispatcher;
 use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\Handler\HandlerRegistry;
@@ -68,7 +69,7 @@ class DeserializationGraphNavigatorTest extends TestCase
 
         $this->context->expects($this->any())
             ->method('getVisitor')
-            ->will($this->returnValue($this->getMockBuilder(VisitorInterface::class)->getMock()));
+            ->will($this->returnValue($this->getMockBuilder(DeserializationVisitorInterface::class)->getMock()));
 
         $this->navigator = new DeserializationGraphNavigator($this->metadataFactory, $this->handlerRegistry, $this->dispatcher, $this->objectConstructor);
         $this->navigator->accept('random', array('name' => $class, 'params' => array()), $this->context);

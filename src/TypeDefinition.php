@@ -39,6 +39,11 @@ final class TypeDefinition
         return new self('UNKNOWN');
     }
 
+
+    public function isUnknown()
+    {
+        return !$this->name || $this->name === 'UNKNOWN';
+    }
     /**
      * @return string
      */
@@ -73,6 +78,7 @@ final class TypeDefinition
     }
 
     /**
+     * @deprecated
      * @return array|null
      */
     public function getArray()
@@ -95,9 +101,15 @@ final class TypeDefinition
         ];
     }
 
-    public static function fromArray(array $type)
+    /**
+     * @deprecated
+     *
+     * @param array|null $type
+     * @return TypeDefinition
+     */
+    public static function fromArray(array $type = null )
     {
-        if (!isset($type['name'])) {
+        if ($type === null || !isset($type['name'])) {
             return self::getUnknown();
         }
         $params = array();

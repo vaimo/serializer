@@ -20,14 +20,19 @@ namespace JMS\Serializer\Construction;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use JMS\Serializer\DeserializationContext;
+use JMS\Serializer\DeserializationVisitorInterface;
 use JMS\Serializer\Metadata\ClassMetadata;
+use JMS\Serializer\TypeDefinition;
 use JMS\Serializer\VisitorInterface;
 
 /**
  * Doctrine object constructor for new (or existing) objects during deserialization.
  */
-final class DoctrineObjectConstructor implements ObjectConstructorInterface
+final class DoctrineObjectConstructor implements ObjectConstructorInterface, ObjectInstantiatorInterface
 {
+
+    use LegacyObjectConstructorTrait;
+
     private $managerRegistry;
     private $fallbackConstructor;
 
@@ -46,7 +51,7 @@ final class DoctrineObjectConstructor implements ObjectConstructorInterface
     /**
      * {@inheritdoc}
      */
-    public function construct(VisitorInterface $visitor, ClassMetadata $metadata, $data, array $type, DeserializationContext $context)
+    public function instantiate(DeserializationVisitorInterface $visitor, ClassMetadata $metadata, $data, TypeDefinition $type, DeserializationContext $context)
     {
         // Locate possible ObjectManager
         $objectManager = $this->managerRegistry->getManagerForClass($metadata->name);
