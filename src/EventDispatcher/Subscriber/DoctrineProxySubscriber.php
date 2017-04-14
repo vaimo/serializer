@@ -31,9 +31,9 @@ class DoctrineProxySubscriber implements EventSubscriberInterface
     /**
      * @var bool
      */
-    private $skipVirtualTypeInit = false;
+    private $skipVirtualTypeInit = true;
 
-    public function __construct($skipVirtualTypeInit = false)
+    public function __construct($skipVirtualTypeInit = true)
     {
         $this->skipVirtualTypeInit = $skipVirtualTypeInit;
     }
