@@ -152,7 +152,7 @@ class YamlSerializationVisitor extends AbstractVisitor implements SerializationV
 
         $count = $this->writer->changeCount;
 
-        if (null !== $v = $this->navigator->acceptData($v, TypeDefinition::fromArray($metadata->type), $context)) {
+        if (null !== $v = $this->navigator->acceptData($v, $metadata->getTypeDefinition(), $context)) {
             $this->writer
                 ->rtrim(false)
                 ->writeln(' '.$v);

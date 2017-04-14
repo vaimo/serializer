@@ -213,7 +213,7 @@ class XmlSerializationVisitor extends AbstractVisitor implements SerializationVi
 
         if ($metadata->xmlAttribute) {
             $this->setCurrentMetadata($metadata);
-            $node = $this->navigator->acceptData($v, TypeDefinition::fromArray($metadata->type), $context);
+            $node = $this->navigator->acceptData($v, $metadata->getTypeDefinition(), $context);
             $this->revertCurrentMetadata();
 
             if (!$node instanceof \DOMCharacterData) {
@@ -235,7 +235,7 @@ class XmlSerializationVisitor extends AbstractVisitor implements SerializationVi
             $this->hasValue = true;
 
             $this->setCurrentMetadata($metadata);
-            $node = $this->navigator->acceptData($v, TypeDefinition::fromArray($metadata->type), $context);
+            $node = $this->navigator->acceptData($v, $metadata->getTypeDefinition(), $context);
             $this->revertCurrentMetadata();
 
             if (!$node instanceof \DOMCharacterData) {
@@ -281,7 +281,7 @@ class XmlSerializationVisitor extends AbstractVisitor implements SerializationVi
 
         $this->setCurrentMetadata($metadata);
 
-        if (null !== $node = $this->navigator->acceptData($v, TypeDefinition::fromArray($metadata->type), $context)) {
+        if (null !== $node = $this->navigator->acceptData($v, $metadata->getTypeDefinition(), $context)) {
             $this->currentNode->appendChild($node);
         }
 

@@ -198,7 +198,7 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
 
             $attributes = $data->attributes($metadata->xmlNamespace);
             if (isset($attributes[$name])) {
-                $v = $this->navigator->acceptData($attributes[$name], TypeDefinition::fromArray($metadata->type), $context);
+                $v = $this->navigator->acceptData($attributes[$name], $metadata->getTypeDefinition(), $context);
                 $this->accessor->setValue($this->currentObject, $v, $metadata);
             }
 
@@ -206,7 +206,7 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
         }
 
         if ($metadata->xmlValue) {
-            $v = $this->navigator->acceptData($data, TypeDefinition::fromArray($metadata->type), $context);
+            $v = $this->navigator->acceptData($data, $metadata->getTypeDefinition(), $context);
             $this->accessor->setValue($this->currentObject, $v, $metadata);
 
             return;
@@ -219,7 +219,7 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
             }
 
             $this->setCurrentMetadata($metadata);
-            $v = $this->navigator->acceptData($enclosingElem, TypeDefinition::fromArray($metadata->type), $context);
+            $v = $this->navigator->acceptData($enclosingElem, $metadata->getTypeDefinition(), $context);
             $this->revertCurrentMetadata();
             $this->accessor->setValue($this->currentObject, $v, $metadata);
 
@@ -248,7 +248,7 @@ class XmlDeserializationVisitor extends AbstractVisitor implements Deserializati
             $node = reset($nodes);
         }
 
-        $v = $this->navigator->acceptData($node, TypeDefinition::fromArray($metadata->type), $context);
+        $v = $this->navigator->acceptData($node, $metadata->getTypeDefinition(), $context);
 
         $this->accessor->setValue($this->currentObject, $v, $metadata);
     }

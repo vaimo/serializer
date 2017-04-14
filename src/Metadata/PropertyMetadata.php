@@ -19,6 +19,7 @@
 namespace JMS\Serializer\Metadata;
 
 use JMS\Serializer\Exception\RuntimeException;
+use JMS\Serializer\TypeDefinition;
 use JMS\Serializer\TypeParser;
 use Metadata\PropertyMetadata as BasePropertyMetadata;
 
@@ -100,6 +101,23 @@ class PropertyMetadata extends BasePropertyMetadata
         }
 
         $obj->{$this->setter}($value);
+    }
+
+    private $typeDefinition;
+
+    /**
+     * @return TypeDefinition|null
+     */
+    public function getTypeDefinition()
+    {
+        if ($this->type !== null){
+            if ($this->typeDefinition === null) {
+                $this->typeDefinition = TypeDefinition::fromArray($this->type);
+            }
+            return $this->typeDefinition;
+        }
+
+        return null;
     }
 
     public function setType($type)

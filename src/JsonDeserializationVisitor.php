@@ -129,7 +129,7 @@ class JsonDeserializationVisitor extends AbstractVisitor implements Deserializat
             throw new RuntimeException(sprintf('You must define a type for %s::$%s.', $metadata->reflection->class, $metadata->name));
         }
 
-        $v = $data[$name] !== null ? $this->navigator->acceptData($data[$name], TypeDefinition::fromArray($metadata->type), $context) : null;
+        $v = $data[$name] !== null ? $this->navigator->acceptData($data[$name], $metadata->getTypeDefinition(), $context) : null;
 
         $this->accessor->setValue($this->currentObject, $v, $metadata);
 

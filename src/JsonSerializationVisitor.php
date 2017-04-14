@@ -117,7 +117,7 @@ class JsonSerializationVisitor extends AbstractVisitor implements SerializationV
     {
         $v = $this->accessor->getValue($data, $metadata);
 
-        $v = $this->navigator->acceptData($v, TypeDefinition::fromArray($metadata->type), $context);
+        $v = $this->navigator->acceptData($v, $metadata->getTypeDefinition(), $context);
         if (null === $v && $context->shouldSerializeNull() !== true) {
             return;
         }
