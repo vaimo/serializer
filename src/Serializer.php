@@ -75,6 +75,8 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
      * @param EventDispatcherInterface|null $dispatcher
      * @param TypeParser|null $typeParser
      * @param ExpressionEvaluatorInterface|null $expressionEvaluator
+     * @param SerializationContextFactoryInterface|null $serializationContextFactory
+     * @param DeserializationContextFactoryInterface|null $deserializationContextFactory
      */
     public function __construct(
         MetadataFactoryInterface $factory,
@@ -84,7 +86,9 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
         array $deserializationVisitors,
         EventDispatcherInterface $dispatcher = null,
         TypeParser $typeParser = null,
-        ExpressionEvaluatorInterface $expressionEvaluator = null
+        ExpressionEvaluatorInterface $expressionEvaluator = null,
+        SerializationContextFactoryInterface $serializationContextFactory = null,
+        DeserializationContextFactoryInterface $deserializationContextFactory = null
     )
     {
         $this->factory = $factory;
@@ -98,8 +102,8 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
         $this->serializationNavigator = new SerializationGraphNavigator($this->factory, $this->handlerRegistry, $this->dispatcher, $expressionEvaluator);
         $this->deserializationNavigator = new DeserializationGraphNavigator($this->factory, $this->handlerRegistry, $this->dispatcher, $objectConstructor);
 
-        $this->serializationContextFactory = new DefaultSerializationContextFactory();
-        $this->deserializationContextFactory = new DefaultDeserializationContextFactory();
+        $this->serializationContextFactory = $serializationContextFactory ?: new DefaultSerializationContextFactory();
+        $this->deserializationContextFactory = $deserializationContextFactory ?: new DefaultDeserializationContextFactory();
     }
 
     public function serialize($data, $format, SerializationContext $context = null, $type = null)
@@ -240,29 +244,5 @@ class Serializer implements SerializerInterface, ArrayTransformerInterface
     public function getMetadataFactory()
     {
         return $this->factory;
-    }
-
-    /**
-     * @param SerializationContextFactoryInterface $serializationContextFactory
-     *
-     * @return self
-     */
-    public function setSerializationContextFactory(SerializationContextFactoryInterface $serializationContextFactory)
-    {
-        $this->serializationContextFactory = $serializationContextFactory;
-
-        return $this;
-    }
-
-    /**
-     * @param DeserializationContextFactoryInterface $deserializationContextFactory
-     *
-     * @return self
-     */
-    public function setDeserializationContextFactory(DeserializationContextFactoryInterface $deserializationContextFactory)
-    {
-        $this->deserializationContextFactory = $deserializationContextFactory;
-
-        return $this;
     }
 }
